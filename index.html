@@ -11,20 +11,12 @@
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         .sticky-header { backdrop-filter: blur(12px); background-color: rgba(37, 99, 235, 0.95); }
         
-        /* Colori dinamici per i select */
         select[data-type="presenza"] { color: #1e40af; background-color: #eff6ff; border: 1px solid #dbeafe; }
         select[data-type="sw"] { color: #166534; background-color: #f0fdf4; border: 1px solid #dcfce7; }
         select[data-type="ferie"] { color: #92400e; background-color: #fffbeb; border: 1px solid #fef3c7; }
         select[data-type="malattia"] { color: #991b1b; background-color: #fef2f2; border: 1px solid #fee2e2; }
         
-        select { 
-            appearance: none; 
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); 
-            background-repeat: no-repeat; 
-            background-position: right 0.75rem center; 
-            background-size: 1rem; 
-            padding-right: 2.5rem !important; 
-        }
+        select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1rem; padding-right: 2.5rem !important; }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -32,18 +24,12 @@
 
     <div id="authOverlay" class="fixed inset-0 z-[100] bg-slate-900 flex items-center justify-center p-6 text-center">
         <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-sm w-full">
-            <div class="w-20 h-20 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-3xl mx-auto mb-6 flex items-center justify-center text-white shadow-xl">
-                <i data-lucide="map-pin" class="w-10 h-10"></i>
-            </div>
+            <div class="w-20 h-20 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-3xl mx-auto mb-6 flex items-center justify-center text-white shadow-xl"><i data-lucide="map-pin" class="w-10 h-10"></i></div>
             <h2 class="text-3xl font-black mb-3 text-slate-800">SmartPlanner</h2>
-            <p class="text-slate-500 text-sm leading-relaxed mb-8">
-                Benvenuto in **SmartPlanner**, l'app per pianificare il tuo lavoro agile ovunque tu sia. I tuoi dati saranno **sempre disponibili** su ogni dispositivo.
-            </p>
-            <button id="loginBtn" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all shadow-lg">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
-                Inizia con Google
+            <p class="text-slate-500 text-sm mb-8">Pianifica il lavoro e guarda chi trovi in ufficio!</p>
+            <button id="loginBtn" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-lg">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> Inizia con Google
             </button>
-            <div id="loadingStatus" class="hidden mt-4 text-xs font-bold text-red-600 uppercase"></div>
         </div>
     </div>
 
@@ -52,49 +38,43 @@
             <div class="max-w-md mx-auto flex justify-between items-center">
                 <button id="logoutBtn" class="p-2 opacity-80"><i data-lucide="log-out" class="w-5 h-5"></i></button>
                 <select id="monthSelector" class="bg-blue-700 border border-blue-400 rounded-xl px-4 py-1.5 text-sm font-bold outline-none"></select>
-                <div id="syncStatus" class="w-3 h-3 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]"></div>
+                <div id="syncStatus" class="w-3 h-3 rounded-full bg-green-400 shadow-sm"></div>
             </div>
         </header>
 
         <main class="max-w-md mx-auto px-4 mt-6 space-y-4">
-            <section class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
-                <div class="grid grid-cols-2 gap-4 text-center">
+            <section class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm text-center">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[10px] text-slate-400 mb-1 uppercase font-black tracking-widest">Smart % (Mese)</label>
+                        <label class="block text-[10px] text-slate-400 mb-1 uppercase font-black">Smart %</label>
                         <input type="number" id="swPercentage" class="w-full bg-slate-50 rounded-2xl py-3 text-center text-xl font-black outline-none border-2 border-transparent focus:border-blue-500 transition-all">
                     </div>
                     <div>
-                        <label class="block text-[10px] text-slate-400 mb-1 uppercase font-black tracking-widest">Recupero (Mese)</label>
+                        <label class="block text-[10px] text-slate-400 mb-1 uppercase font-black">Recupero (gg)</label>
                         <input type="number" id="recoveryDays" class="w-full bg-slate-50 rounded-2xl py-3 text-center text-xl font-black outline-none border-2 border-transparent focus:border-blue-500 transition-all">
                     </div>
                 </div>
             </section>
 
             <section class="grid grid-cols-2 gap-3 sticky top-[80px] z-40">
-                <div id="cardSW" class="bg-white/90 backdrop-blur-md rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent transition-all text-center">
+                <div id="cardSW" class="bg-white/90 backdrop-blur-md rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent text-center">
                     <span class="text-slate-500 text-[10px] font-bold uppercase block mb-1">Smart Target</span>
-                    <div class="flex justify-center items-baseline gap-1">
-                        <span id="actualSW" class="text-3xl font-black text-slate-800">0</span>
-                        <span class="text-slate-400 font-bold text-sm">/ <span id="targetSW">0</span></span>
-                    </div>
+                    <div class="flex justify-center items-baseline gap-1"><span id="actualSW" class="text-3xl font-black">0</span><span class="text-slate-400 font-bold text-sm">/ <span id="targetSW">0</span></span></div>
                 </div>
-                <div id="cardPresenza" class="bg-white/90 backdrop-blur-md rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent transition-all text-center">
+                <div id="cardPresenza" class="bg-white/90 backdrop-blur-md rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent text-center">
                     <span class="text-slate-500 text-[10px] font-bold uppercase block mb-1">Ufficio Target</span>
-                    <div class="flex justify-center items-baseline gap-1">
-                        <span id="actualPresenza" class="text-3xl font-black text-slate-800">0</span>
-                        <span class="text-slate-400 font-bold text-sm">/ <span id="targetPresenza">0</span></span>
-                    </div>
+                    <div class="flex justify-center items-baseline gap-1"><span id="actualPresenza" class="text-3xl font-black">0</span><span class="text-slate-400 font-bold text-sm">/ <span id="targetPresenza">0</span></span></div>
                 </div>
             </section>
 
-            <div id="calendarList" class="space-y-2 pb-10"></div>
+            <div id="calendarList" class="space-y-3 pb-10"></div>
         </main>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
   apiKey: "AIzaSyBZ8vqYNgqhCe2Bi21CaRiOp5jiz9EEeFo",
@@ -113,18 +93,13 @@
         const provider = new GoogleAuthProvider();
 
         let currentUser = null;
-        let state = { 
-            currentMonth: new Date().toISOString().slice(0, 7), 
-            data: {}, // calendar: { "2024-12": { 1: "sw", ... } }
-            monthlyConfigs: {} // { "2024-12": { percentage: 60, recovery: 2 } }
-        };
+        let state = { currentMonth: new Date().toISOString().slice(0, 7), data: {}, monthlyConfigs: {}, globalPresence: {} };
 
         const dom = {
             authOverlay: document.getElementById('authOverlay'),
             appContent: document.getElementById('appContent'),
             loginBtn: document.getElementById('loginBtn'),
             logoutBtn: document.getElementById('logoutBtn'),
-            loadingStatus: document.getElementById('loadingStatus'),
             monthSelector: document.getElementById('monthSelector'),
             swPercentage: document.getElementById('swPercentage'),
             recoveryDays: document.getElementById('recoveryDays'),
@@ -140,11 +115,7 @@
 
         setPersistence(auth, browserLocalPersistence);
 
-        dom.loginBtn.onclick = async () => {
-            try { await signInWithPopup(auth, provider); } 
-            catch (err) { dom.loadingStatus.textContent = "Errore login."; dom.loadingStatus.classList.remove('hidden'); }
-        };
-
+        dom.loginBtn.onclick = () => signInWithPopup(auth, provider);
         dom.logoutBtn.onclick = () => signOut(auth);
 
         onAuthStateChanged(auth, (user) => {
@@ -169,6 +140,7 @@
             }
             dom.monthSelector.value = state.currentMonth;
 
+            // Ascolta i dati dell'utente
             onValue(ref(db, 'users/' + currentUser.uid), (snap) => {
                 const cloud = snap.val();
                 if (cloud) {
@@ -176,6 +148,12 @@
                     state.monthlyConfigs = cloud.monthlyConfigs || {};
                 }
                 loadMonthlyConfig();
+                render();
+            });
+
+            // Ascolta la presenza globale di tutti
+            onValue(ref(db, 'global_presence'), (snap) => {
+                state.globalPresence = snap.val() || {};
                 render();
             });
 
@@ -228,22 +206,33 @@
             for (let d = 1; d <= daysInMonth; d++) {
                 const dObj = new Date(y, m-1, d, 12, 0, 0);
                 const dStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                
                 if (dObj.getDay()!==0 && dObj.getDay()!==6 && !holidays.includes(dStr)) {
                     workdays++;
                     const val = (state.data[state.currentMonth] && state.data[state.currentMonth][d]) || 'presenza';
                     count[val]++;
+
+                    // Trova colleghi in ufficio per questo giorno
+                    const dayKey = `${state.currentMonth}-${d}`;
+                    const colleagues = state.globalPresence[dayKey] ? Object.values(state.globalPresence[dayKey]).filter(name => name !== currentUser.displayName) : [];
+                    const colleaguesHtml = colleagues.length > 0 ? 
+                        `<div class="mt-2 text-[10px] text-slate-400 flex items-center gap-1"><i data-lucide="users" class="w-3 h-3"></i> In ufficio: ${colleagues.join(', ')}</div>` : '';
+
                     html += `
-                        <div class="bg-white p-4 rounded-2xl flex items-center justify-between border border-slate-100 shadow-sm">
-                            <div class="bg-slate-50 rounded-xl p-2 min-w-[55px] text-center">
-                                <span class="block text-[10px] font-bold text-blue-600 uppercase tracking-tighter">${dObj.toLocaleDateString('it-IT',{weekday:'short'})}</span>
-                                <span class="text-xl font-black text-slate-800">${d}</span>
+                        <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div class="bg-slate-50 rounded-xl p-2 min-w-[55px] text-center">
+                                    <span class="block text-[10px] font-bold text-blue-600 uppercase">${dObj.toLocaleDateString('it-IT',{weekday:'short'})}</span>
+                                    <span class="text-xl font-black text-slate-800">${d}</span>
+                                </div>
+                                <select onchange="window.updateDay(${d}, this.value)" data-type="${val}" class="rounded-xl px-4 py-3 text-sm font-black outline-none transition-all">
+                                    <option value="presenza" ${val==='presenza'?'selected':''}>🏢 Ufficio</option>
+                                    <option value="sw" ${val==='sw'?'selected':''}>🏠 Smart</option>
+                                    <option value="ferie" ${val==='ferie'?'selected':''}>🌴 Ferie</option>
+                                    <option value="malattia" ${val==='malattia'?'selected':''}>🤒 Malattia</option>
+                                </select>
                             </div>
-                            <select onchange="window.updateDay(${d}, this.value)" data-type="${val}" class="rounded-xl px-4 py-3 text-sm font-black outline-none transition-all">
-                                <option value="presenza" ${val==='presenza'?'selected':''}>🏢 Ufficio</option>
-                                <option value="sw" ${val==='sw'?'selected':''}>🏠 Smart</option>
-                                <option value="ferie" ${val==='ferie'?'selected':''}>🌴 Ferie</option>
-                                <option value="malattia" ${val==='malattia'?'selected':''}>🤒 Malattia</option>
-                            </select>
+                            ${colleaguesHtml}
                         </div>`;
                 }
             }
@@ -253,19 +242,25 @@
             const tSW = Math.max(0, Math.round(netti * (conf.percentage/100)) - count.malattia);
             const tPres = Math.round(netti * (1 - conf.percentage/100)) + conf.recovery;
 
-            dom.targetSW.textContent = tSW;
-            dom.targetPresenza.textContent = tPres;
-            dom.actualSW.textContent = count.sw;
-            dom.actualPresenza.textContent = count.presenza;
-
+            dom.targetSW.textContent = tSW; dom.targetPresenza.textContent = tPres;
+            dom.actualSW.textContent = count.sw; dom.actualPresenza.textContent = count.presenza;
             dom.cardSW.style.borderColor = count.sw > tSW ? '#ef4444' : 'transparent';
             dom.cardPresenza.style.borderColor = count.presenza < tPres ? '#f59e0b' : 'transparent';
             lucide.createIcons();
         }
 
-        window.updateDay = (d, v) => {
+        window.updateDay = (day, value) => {
             if(!state.data[state.currentMonth]) state.data[state.currentMonth] = {};
-            state.data[state.currentMonth][d] = v;
+            state.data[state.currentMonth][day] = value;
+            
+            // Aggiorna presenza globale
+            const dayKey = `${state.currentMonth}-${day}`;
+            if (value === 'presenza') {
+                set(ref(db, `global_presence/${dayKey}/${currentUser.uid}`), currentUser.displayName);
+            } else {
+                remove(ref(db, `global_presence/${dayKey}/${currentUser.uid}`));
+            }
+            
             save();
         };
 
