@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartPlanner Cloud</title>
-    
+    <title>SmartPlanner Pro Cloud</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
@@ -17,19 +15,19 @@
         select[data-type="ferie"] { color: #92400e; background-color: #fffbeb; border: 1px solid #fef3c7; }
         select[data-type="malattia"] { color: #991b1b; background-color: #fef2f2; border: 1px solid #fee2e2; }
         select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1rem; padding-right: 2rem !important; }
-        .hidden { display: none; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="pb-10">
 
-    <div id="authOverlay" class="fixed inset-0 z-[100] bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
-        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-sm w-full">
-            <div class="w-20 h-20 bg-blue-600 rounded-3xl mx-auto mb-6 flex items-center justify-center text-white shadow-lg shadow-blue-200">
-                <i data-lucide="cloud-lightning" class="w-10 h-10"></i>
+    <div id="authOverlay" class="fixed inset-0 z-[100] bg-slate-900 flex items-center justify-center p-6">
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-sm w-full text-center">
+            <div class="w-16 h-16 bg-blue-600 rounded-2xl mx-auto mb-6 flex items-center justify-center text-white shadow-lg">
+                <i data-lucide="cloud-lightning"></i>
             </div>
-            <h2 class="text-2xl font-black text-slate-800 mb-2">SmartPlanner</h2>
-            <p class="text-slate-500 text-sm mb-8">Pianifica il tuo lavoro e sincronizza i dati su tutti i tuoi dispositivi.</p>
-            <button id="loginBtn" class="w-full bg-slate-800 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-slate-700 transition-all">
+            <h2 class="text-2xl font-black mb-2 text-slate-800">SmartPlanner</h2>
+            <p class="text-slate-500 text-sm mb-8">I tuoi dati e il tuo **recupero** sempre sincronizzati sul cloud.</p>
+            <button id="loginBtn" class="w-full bg-slate-800 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
                 Accedi con Google
             </button>
@@ -37,10 +35,10 @@
     </div>
 
     <div id="appContent" class="hidden">
-        <header class="sticky top-0 z-50 sticky-header text-white p-4 shadow-sm">
+        <header class="sticky top-0 z-50 sticky-header text-white p-4">
             <div class="max-w-md mx-auto flex justify-between items-center">
-                <button id="logoutBtn" class="text-blue-200"><i data-lucide="log-out" class="w-5 h-5"></i></button>
-                <select id="monthSelector" class="bg-blue-700 border border-blue-400 rounded-xl px-3 py-1.5 text-sm font-bold outline-none"></select>
+                <button id="logoutBtn" class="opacity-70"><i data-lucide="log-out" class="w-5 h-5"></i></button>
+                <select id="monthSelector" class="bg-blue-700 border border-blue-400 rounded-xl px-3 py-1 text-sm font-bold outline-none"></select>
                 <div id="syncStatus" class="w-2 h-2 rounded-full bg-green-400"></div>
             </div>
         </header>
@@ -49,25 +47,25 @@
             <section class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
                 <div class="grid grid-cols-2 gap-4">
                     <div class="text-center">
-                        <label class="block text-[10px] text-slate-400 mb-2 uppercase font-black tracking-widest">Smart %</label>
-                        <input type="number" id="swPercentage" class="w-full bg-slate-50 rounded-2xl py-4 text-center text-2xl font-black text-slate-800 outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                        <label class="block text-[10px] text-slate-400 mb-1 uppercase font-black tracking-widest">Smart %</label>
+                        <input type="number" id="swPercentage" class="w-full bg-slate-50 rounded-2xl py-3 text-center text-xl font-black outline-none border-2 border-transparent focus:border-blue-500 transition-all">
                     </div>
                     <div class="text-center">
-                        <label class="block text-[10px] text-slate-400 mb-2 uppercase font-black tracking-widest">Recupero (gg)</label>
-                        <input type="number" id="recoveryDays" class="w-full bg-slate-50 rounded-2xl py-4 text-center text-2xl font-black text-slate-800 outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                        <label class="block text-[10px] text-slate-400 mb-1 uppercase font-black tracking-widest">Recupero (gg)</label>
+                        <input type="number" id="recoveryDays" class="w-full bg-slate-50 rounded-2xl py-3 text-center text-xl font-black outline-none border-2 border-transparent focus:border-blue-500 transition-all">
                     </div>
                 </div>
             </section>
 
             <section class="grid grid-cols-2 gap-3 sticky top-[75px] z-40">
-                <div id="cardSW" class="bg-white rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent">
+                <div id="cardSW" class="bg-white rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent transition-all">
                     <span class="text-slate-500 text-[10px] font-bold uppercase block mb-1">Smart Target</span>
                     <div class="flex items-baseline gap-1">
                         <span id="actualSW" class="text-3xl font-black text-slate-800">0</span>
                         <span class="text-slate-400 font-bold text-sm">/ <span id="targetSW">0</span></span>
                     </div>
                 </div>
-                <div id="cardPresenza" class="bg-white rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent">
+                <div id="cardPresenza" class="bg-white rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent transition-all">
                     <span class="text-slate-500 text-[10px] font-bold uppercase block mb-1">Ufficio Target</span>
                     <div class="flex items-baseline gap-1">
                         <span id="actualPresenza" class="text-3xl font-black text-slate-800">0</span>
@@ -76,26 +74,34 @@
                 </div>
             </section>
 
-            <div id="calendarList" class="space-y-2"></div>
+            <div id="calendarList" class="space-y-2 pb-10"></div>
         </main>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { 
+            getAuth, 
+            setPersistence, 
+            browserLocalPersistence, 
+            signInWithRedirect, 
+            getRedirectResult, 
+            GoogleAuthProvider, 
+            onAuthStateChanged, 
+            signOut 
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // CONFIGURAZIONE - INCOLLA I TUOI DATI QUI
+        // CONFIGURAZIONE FIREBASE
         const firebaseConfig = {
-  apiKey: "AIzaSyBZ8vqYNgqhCe2Bi21CaRiOp5jiz9EEeFo",
-  authDomain: "smartplannerinv.firebaseapp.com",
-  databaseURL: "https://smartplannerinv-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "smartplannerinv",
-  storageBucket: "smartplannerinv.firebasestorage.app",
-  messagingSenderId: "845850448866",
-  appId: "1:845850448866:web:bb849a171023ce57725fbb",
-  measurementId: "G-5B9GCHDX7E"
-};
+            apiKey: "IL_TUO_API_KEY",
+            authDomain: "IL_TUO_PROGETTO.firebaseapp.com",
+            databaseURL: "https://IL_TUO_PROGETTO-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "IL_TUO_PROGETTO_ID",
+            storageBucket: "IL_TUO_PROGETTO.appspot.com",
+            messagingSenderId: "IL_TUO_SENDER_ID",
+            appId: "IL_TUO_APP_ID"
+        };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -103,13 +109,12 @@
         const provider = new GoogleAuthProvider();
 
         let currentUser = null;
-        const state = {
-            currentMonth: new Date().toISOString().slice(0, 7),
-            data: {},
-            config: { percentage: 60, recovery: 0 }
+        let state = { 
+            currentMonth: new Date().toISOString().slice(0, 7), 
+            data: {}, 
+            config: { percentage: 60, recovery: 0 } 
         };
 
-        // DOM Elements
         const dom = {
             authOverlay: document.getElementById('authOverlay'),
             appContent: document.getElementById('appContent'),
@@ -128,8 +133,10 @@
             syncStatus: document.getElementById('syncStatus')
         };
 
-        // --- AUTH LOGIC ---
-        dom.loginBtn.onclick = () => signInWithPopup(auth, provider);
+        // GESTIONE PERSISTENZA E LOGIN
+        setPersistence(auth, browserLocalPersistence).catch(err => console.error(err));
+
+        dom.loginBtn.onclick = () => signInWithRedirect(auth, provider);
         dom.logoutBtn.onclick = () => signOut(auth);
 
         onAuthStateChanged(auth, (user) => {
@@ -144,9 +151,7 @@
             }
         });
 
-        // --- CORE LOGIC ---
         function initApp() {
-            // Genera Mesi
             const now = new Date();
             dom.monthSelector.innerHTML = '';
             for (let i = 0; i < 12; i++) {
@@ -156,10 +161,9 @@
             }
             dom.monthSelector.value = state.currentMonth;
 
-            // Carica da Firebase
-            const userRef = ref(db, 'users/' + currentUser.uid);
-            onValue(userRef, (snapshot) => {
-                const cloud = snapshot.val();
+            // Ascolta variazioni dal Cloud
+            onValue(ref(db, 'users/' + currentUser.uid), (snap) => {
+                const cloud = snap.val();
                 if (cloud) {
                     state.data = cloud.calendar || {};
                     state.config = cloud.settings || { percentage: 60, recovery: 0 };
@@ -171,30 +175,29 @@
 
             dom.monthSelector.onchange = (e) => { state.currentMonth = e.target.value; render(); };
             
-            const syncSettings = () => {
+            const sync = () => {
                 state.config.percentage = parseInt(dom.swPercentage.value) || 0;
                 state.config.recovery = parseInt(dom.recoveryDays.value) || 0;
                 save();
             };
-            dom.swPercentage.oninput = syncSettings;
-            dom.recoveryDays.oninput = syncSettings;
+            dom.swPercentage.oninput = sync;
+            dom.recoveryDays.oninput = sync;
         }
 
         function save() {
             dom.syncStatus.classList.replace('bg-green-400', 'bg-amber-400');
-            set(ref(db, 'users/' + currentUser.uid), {
-                calendar: state.data,
-                settings: state.config
+            set(ref(db, 'users/' + currentUser.uid), { 
+                calendar: state.data, 
+                settings: state.config 
             }).then(() => {
                 dom.syncStatus.classList.replace('bg-amber-400', 'bg-green-400');
             });
         }
 
-        function getHolidays(year) {
-            const h = [`${year}-01-01`, `${year}-01-06`, `${year}-04-25`, `${year}-05-01`, `${year}-06-02`, `${year}-08-15`, `${year}-11-01`, `${year}-12-08`, `${year}-12-25`, `${year}-12-26` ];
-            const a = year % 19, b = Math.floor(year / 100), c = year % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h_b = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h_b - k) % 7, m = Math.floor((a + 11 * h_b + 22 * l) / 451), month = Math.floor((h_b + l - 7 * m + 114) / 31), day = ((h_b + l - 7 * m + 114) % 31) + 1;
-            const p = new Date(year, month - 1, day + 1);
-            h.push(`${p.getFullYear()}-${String(p.getMonth()+1).padStart(2,'0')}-${String(p.getDate()).padStart(2,'0')}`);
+        function getHolidays(y) {
+            const h = [`${y}-01-01`,`${y}-01-06`,`${y}-04-25`,`${y}-05-01`,`${y}-06-02`,`${y}-08-15`,`${y}-11-01`,`${y}-12-08`,`${y}-12-25`,`${y}-12-26` ];
+            const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h_b=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h_b-k)%7,m=Math.floor((a+11*h_b+22*l)/451),month=Math.floor((h_b+l-7*m+114)/31),day=((h_b+l-7*m+114)%31)+1;
+            h.push(`${y}-${String(month).padStart(2,'0')}-${String(day+1).padStart(2,'0')}`);
             return h;
         }
 
@@ -207,19 +210,19 @@
             let html = '', workdays = 0, count = { presenza:0, sw:0, ferie:0, malattia:0 };
 
             for (let d = 1; d <= daysInMonth; d++) {
-                const dObj = new Date(y, m - 1, d, 12, 0, 0);
-                const dStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                if (dObj.getDay() !== 0 && dObj.getDay() !== 6 && !holidays.includes(dStr)) {
+                const dObj = new Date(y, m-1, d, 12, 0, 0);
+                const dStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                if (dObj.getDay()!==0 && dObj.getDay()!==6 && !holidays.includes(dStr)) {
                     workdays++;
                     const val = (state.data[monthKey] && state.data[monthKey][d]) || 'presenza';
                     count[val]++;
                     html += `
-                        <div class="bg-white p-4 rounded-2xl flex items-center justify-between border border-slate-100">
+                        <div class="bg-white p-4 rounded-2xl flex items-center justify-between border border-slate-100 shadow-sm">
                             <div class="bg-slate-50 rounded-xl p-2 min-w-[55px] text-center">
-                                <span class="block text-[10px] font-bold text-blue-600 uppercase">${dObj.toLocaleDateString('it-IT', { weekday: 'short' })}</span>
+                                <span class="block text-[10px] font-bold text-blue-600 uppercase tracking-tighter">${dObj.toLocaleDateString('it-IT', { weekday: 'short' })}</span>
                                 <span class="text-xl font-black text-slate-800">${d}</span>
                             </div>
-                            <select onchange="window.updateDay(${d}, this.value)" data-type="${val}" class="rounded-xl px-4 py-3 text-sm font-black outline-none">
+                            <select onchange="window.updateDay(${d}, this.value)" data-type="${val}" class="rounded-xl px-4 py-3 text-sm font-black transition-all outline-none">
                                 <option value="presenza" ${val==='presenza'?'selected':''}>🏢 Ufficio</option>
                                 <option value="sw" ${val==='sw'?'selected':''}>🏠 Smart</option>
                                 <option value="ferie" ${val==='ferie'?'selected':''}>🌴 Ferie</option>
@@ -230,9 +233,9 @@
             }
             dom.calendarList.innerHTML = html;
 
-            const ggNetti = workdays - count.ferie;
-            const tSW = Math.max(0, Math.round(ggNetti * (state.config.percentage/100)) - count.malattia);
-            const tPres = Math.round(ggNetti * (1 - state.config.percentage/100)) + state.config.recovery;
+            const netti = workdays - count.ferie;
+            const tSW = Math.max(0, Math.round(netti * (state.config.percentage/100)) - count.malattia);
+            const tPres = Math.round(netti * (1 - state.config.percentage/100)) + state.config.recovery;
 
             dom.targetSW.textContent = tSW;
             dom.targetPresenza.textContent = tPres;
