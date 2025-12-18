@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SmartPlanner Pro</title>
-    <link rel="manifest" href="manifest.json">
+    
     <meta name="theme-color" content="#2563eb">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2370/2370264.png">
     
@@ -20,7 +20,6 @@
         }
         .sticky-header { backdrop-filter: blur(12px); background-color: rgba(37, 99, 235, 0.95); }
         
-        /* Select styling pulita */
         select[data-type="presenza"] { color: #1e40af; background-color: #eff6ff; border: 1px solid #dbeafe; }
         select[data-type="sw"] { color: #166534; background-color: #f0fdf4; border: 1px solid #dcfce7; }
         select[data-type="ferie"] { color: #92400e; background-color: #fffbeb; border: 1px solid #fef3c7; }
@@ -34,9 +33,6 @@
             padding-right: 2rem !important;
             appearance: none;
         }
-
-        /* Rimosso il bordino fastidioso e ammorbidite le ombre */
-        .info-card { border: none !important; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
     </style>
 </head>
 <body class="pb-12">
@@ -44,7 +40,7 @@
     <header class="sticky top-0 z-50 sticky-header text-white p-4 shadow-sm">
         <div class="max-w-md mx-auto flex justify-between items-center">
             <h1 class="text-xl font-black tracking-tight flex items-center gap-2">
-                <i data-lucide="layout-dashboard" class="w-6 h-6"></i> PLANNER
+                <i data-lucide="calendar-range" class="w-6 h-6"></i> PLANNER
             </h1>
             <select id="monthSelector" class="bg-blue-700 border border-blue-400 rounded-xl px-3 py-1.5 text-sm font-bold outline-none"></select>
         </div>
@@ -52,7 +48,7 @@
 
     <main class="max-w-md mx-auto px-4 mt-6 space-y-4">
         
-        <section class="bg-white rounded-[2rem] p-6 info-card border border-slate-100">
+        <section class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
             <div class="grid grid-cols-2 gap-4">
                 <div class="text-center">
                     <label class="block text-[10px] text-slate-400 mb-2 uppercase font-black tracking-widest">Smart %</label>
@@ -116,7 +112,7 @@
 
         const state = {
             currentMonth: (() => { const now = new Date(); return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`; })(),
-            data: JSON.parse(localStorage.getItem('sw_db_v7')) || {}
+            data: JSON.parse(localStorage.getItem('sw_db_v8')) || {}
         };
 
         const dom = {
@@ -135,12 +131,19 @@
         };
 
         function init() {
-            const currentYear = new Date().getFullYear();
-            for (let m = 0; m < 12; m++) {
-                const d = new Date(currentYear, m, 1, 12, 0, 0);
-                const val = `${currentYear}-${String(m + 1).padStart(2, '0')}`;
-                dom.monthSelector.innerHTML += `<option value="${val}" ${val === state.currentMonth ? 'selected' : ''}>${d.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })}</option>`;
+            const now = new Date();
+            // Genera una finestra di 12 mesi a partire da oggi
+            for (let i = 0; i < 12; i++) {
+                const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+                const year = d.getFullYear();
+                const month = d.getMonth() + 1;
+                const val = `${year}-${String(month).padStart(2, '0')}`;
+                
+                dom.monthSelector.innerHTML += `<option value="${val}" ${val === state.currentMonth ? 'selected' : ''}>
+                    ${d.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })}
+                </option>`;
             }
+
             dom.monthSelector.addEventListener('change', e => { state.currentMonth = e.target.value; render(); });
             dom.swPercentage.addEventListener('input', render);
             dom.recoveryDays.addEventListener('input', render);
@@ -204,11 +207,10 @@
             dom.actualSW.textContent = count.sw;
             dom.actualPresenza.textContent = count.presenza;
 
-            // Feedback Alert moderni (senza cambiare colore di sfondo, solo il bordo)
             dom.cardSW.style.borderColor = count.sw > targetSW ? '#ef4444' : 'transparent';
             dom.cardPresenza.style.borderColor = count.presenza < targetPresenza ? '#f59e0b' : 'transparent';
 
-            localStorage.setItem('sw_db_v7', JSON.stringify(state.data));
+            localStorage.setItem('sw_db_v8', JSON.stringify(state.data));
             lucide.createIcons();
         }
 
