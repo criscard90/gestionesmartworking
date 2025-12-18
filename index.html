@@ -11,7 +11,7 @@
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         .sticky-header { backdrop-filter: blur(12px); background-color: rgba(37, 99, 235, 0.95); }
         
-        /* Colori dinamici che avevamo impostato */
+        /* Colori dinamici per i select */
         select[data-type="presenza"] { color: #1e40af; background-color: #eff6ff; border: 1px solid #dbeafe; }
         select[data-type="sw"] { color: #166534; background-color: #f0fdf4; border: 1px solid #dcfce7; }
         select[data-type="ferie"] { color: #92400e; background-color: #fffbeb; border: 1px solid #fef3c7; }
@@ -37,7 +37,7 @@
             </div>
             <h2 class="text-3xl font-black mb-3 text-slate-800">SmartPlanner</h2>
             <p class="text-slate-500 text-sm leading-relaxed mb-8">
-                Benvenuto in SmartPlanner, l'app per pianificare il tuo lavoro agile ovunque tu sia. I tuoi dati saranno sempre disponibili su ogni dispositivo.
+                Benvenuto in **SmartPlanner**, l'app per pianificare il tuo lavoro agile ovunque tu sia. I tuoi dati saranno **sempre disponibili** su ogni dispositivo.
             </p>
             <button id="loginBtn" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all shadow-lg">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
@@ -60,11 +60,11 @@
             <section class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
                 <div class="grid grid-cols-2 gap-4 text-center">
                     <div>
-                        <label class="block text-[10px] text-slate-400 mb-1 uppercase font-black tracking-widest">Smart %</label>
+                        <label class="block text-[10px] text-slate-400 mb-1 uppercase font-black tracking-widest">Smart % (Mese)</label>
                         <input type="number" id="swPercentage" class="w-full bg-slate-50 rounded-2xl py-3 text-center text-xl font-black outline-none border-2 border-transparent focus:border-blue-500 transition-all">
                     </div>
                     <div>
-                        <label class="block text-[10px] text-slate-400 mb-1 uppercase font-black tracking-widest">Recupero (gg)</label>
+                        <label class="block text-[10px] text-slate-400 mb-1 uppercase font-black tracking-widest">Recupero (Mese)</label>
                         <input type="number" id="recoveryDays" class="w-full bg-slate-50 rounded-2xl py-3 text-center text-xl font-black outline-none border-2 border-transparent focus:border-blue-500 transition-all">
                     </div>
                 </div>
@@ -106,13 +106,18 @@
   appId: "1:845850448866:web:bb849a171023ce57725fbb",
   measurementId: "G-5B9GCHDX7E"
 };
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
 
         let currentUser = null;
-        let state = { currentMonth: new Date().toISOString().slice(0, 7), data: {}, config: { percentage: 60, recovery: 0 } };
+        let state = { 
+            currentMonth: new Date().toISOString().slice(0, 7), 
+            data: {}, // calendar: { "2024-12": { 1: "sw", ... } }
+            monthlyConfigs: {} // { "2024-12": { percentage: 60, recovery: 2 } }
+        };
 
         const dom = {
             authOverlay: document.getElementById('authOverlay'),
@@ -136,12 +141,8 @@
         setPersistence(auth, browserLocalPersistence);
 
         dom.loginBtn.onclick = async () => {
-            try {
-                await signInWithPopup(auth, provider);
-            } catch (err) {
-                dom.loadingStatus.textContent = "Errore login. Riprova.";
-                dom.loadingStatus.classList.remove('hidden');
-            }
+            try { await signInWithPopup(auth, provider); } 
+            catch (err) { dom.loadingStatus.textContent = "Errore login."; dom.loadingStatus.classList.remove('hidden'); }
         };
 
         dom.logoutBtn.onclick = () => signOut(auth);
@@ -161,7 +162,7 @@
         function initApp() {
             const now = new Date();
             dom.monthSelector.innerHTML = '';
-            for (let i = 0; i < 12; i++) {
+            for (let i = -1; i < 12; i++) {
                 const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
                 const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
                 dom.monthSelector.innerHTML += `<option value="${val}">${d.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })}</option>`;
@@ -172,27 +173,41 @@
                 const cloud = snap.val();
                 if (cloud) {
                     state.data = cloud.calendar || {};
-                    state.config = cloud.settings || { percentage: 60, recovery: 0 };
-                    dom.swPercentage.value = state.config.percentage;
-                    dom.recoveryDays.value = state.config.recovery;
+                    state.monthlyConfigs = cloud.monthlyConfigs || {};
                 }
+                loadMonthlyConfig();
                 render();
             });
 
-            dom.monthSelector.onchange = (e) => { state.currentMonth = e.target.value; render(); };
+            dom.monthSelector.onchange = (e) => { 
+                state.currentMonth = e.target.value; 
+                loadMonthlyConfig();
+                render(); 
+            };
+
             const sync = () => {
-                state.config.percentage = parseInt(dom.swPercentage.value) || 0;
-                state.config.recovery = parseInt(dom.recoveryDays.value) || 0;
+                state.monthlyConfigs[state.currentMonth] = {
+                    percentage: parseInt(dom.swPercentage.value) || 0,
+                    recovery: parseInt(dom.recoveryDays.value) || 0
+                };
                 save();
             };
             dom.swPercentage.oninput = sync;
             dom.recoveryDays.oninput = sync;
         }
 
+        function loadMonthlyConfig() {
+            const conf = state.monthlyConfigs[state.currentMonth] || { percentage: 60, recovery: 0 };
+            dom.swPercentage.value = conf.percentage;
+            dom.recoveryDays.value = conf.recovery;
+        }
+
         function save() {
             dom.syncStatus.classList.replace('bg-green-400', 'bg-amber-400');
-            set(ref(db, 'users/' + currentUser.uid), { calendar: state.data, settings: state.config })
-                .then(() => dom.syncStatus.classList.replace('bg-amber-400', 'bg-green-400'));
+            set(ref(db, 'users/' + currentUser.uid), { 
+                calendar: state.data, 
+                monthlyConfigs: state.monthlyConfigs 
+            }).then(() => dom.syncStatus.classList.replace('bg-amber-400', 'bg-green-400'));
         }
 
         function getHolidays(y) {
@@ -206,6 +221,8 @@
             const [y, m] = state.currentMonth.split('-').map(Number);
             const daysInMonth = new Date(y, m, 0).getDate();
             const holidays = getHolidays(y);
+            const conf = state.monthlyConfigs[state.currentMonth] || { percentage: 60, recovery: 0 };
+            
             let html = '', workdays = 0, count = { presenza:0, sw:0, ferie:0, malattia:0 };
 
             for (let d = 1; d <= daysInMonth; d++) {
@@ -233,8 +250,8 @@
             dom.calendarList.innerHTML = html;
 
             const netti = workdays - count.ferie;
-            const tSW = Math.max(0, Math.round(netti * (state.config.percentage/100)) - count.malattia);
-            const tPres = Math.round(netti * (1 - state.config.percentage/100)) + state.config.recovery;
+            const tSW = Math.max(0, Math.round(netti * (conf.percentage/100)) - count.malattia);
+            const tPres = Math.round(netti * (1 - conf.percentage/100)) + conf.recovery;
 
             dom.targetSW.textContent = tSW;
             dom.targetPresenza.textContent = tPres;
