@@ -52,12 +52,12 @@
             <div class="grid grid-cols-2 gap-4">
                 <div class="text-center">
                     <label class="block text-[10px] text-slate-400 mb-2 uppercase font-black tracking-widest">Smart %</label>
-                    <input type="number" id="swPercentage" value="60" min="0" max="100" 
+                    <input type="number" id="swPercentage" min="0" max="100" 
                         class="w-full bg-slate-50 rounded-2xl py-4 text-center text-2xl font-black text-slate-800 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition-all">
                 </div>
                 <div class="text-center">
-                    <label class="block text-[10px] text-slate-400 mb-2 uppercase font-black tracking-widest">Recupero</label>
-                    <input type="number" id="recoveryDays" value="0" min="0" 
+                    <label class="block text-[10px] text-slate-400 mb-2 uppercase font-black tracking-widest">Recupero (gg)</label>
+                    <input type="number" id="recoveryDays" min="0" 
                         class="w-full bg-slate-50 rounded-2xl py-4 text-center text-2xl font-black text-slate-800 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition-all">
                 </div>
             </div>
@@ -112,7 +112,8 @@
 
         const state = {
             currentMonth: (() => { const now = new Date(); return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`; })(),
-            data: JSON.parse(localStorage.getItem('sw_db_v8')) || {}
+            data: JSON.parse(localStorage.getItem('sw_db_v9')) || {},
+            config: JSON.parse(localStorage.getItem('sw_config')) || { percentage: 60, recovery: 0 }
         };
 
         const dom = {
@@ -131,22 +132,32 @@
         };
 
         function init() {
+            // Carica configurazione salvata nei campi input
+            dom.swPercentage.value = state.config.percentage;
+            dom.recoveryDays.value = state.config.recovery;
+
             const now = new Date();
-            // Genera una finestra di 12 mesi a partire da oggi
             for (let i = 0; i < 12; i++) {
                 const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-                const year = d.getFullYear();
-                const month = d.getMonth() + 1;
-                const val = `${year}-${String(month).padStart(2, '0')}`;
-                
+                const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
                 dom.monthSelector.innerHTML += `<option value="${val}" ${val === state.currentMonth ? 'selected' : ''}>
                     ${d.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })}
                 </option>`;
             }
 
             dom.monthSelector.addEventListener('change', e => { state.currentMonth = e.target.value; render(); });
-            dom.swPercentage.addEventListener('input', render);
-            dom.recoveryDays.addEventListener('input', render);
+            
+            // Listener per salvare la configurazione appena cambia
+            const saveConfig = () => {
+                state.config.percentage = parseInt(dom.swPercentage.value) || 0;
+                state.config.recovery = parseInt(dom.recoveryDays.value) || 0;
+                localStorage.setItem('sw_config', JSON.stringify(state.config));
+                render();
+            };
+
+            dom.swPercentage.addEventListener('input', saveConfig);
+            dom.recoveryDays.addEventListener('input', saveConfig);
+            
             render();
             lucide.createIcons();
         }
@@ -175,11 +186,9 @@
                     count[saved]++;
                     html += `
                         <div class="bg-white p-4 rounded-2xl flex items-center justify-between border border-slate-100 shadow-sm">
-                            <div class="flex items-center gap-3">
-                                <div class="bg-slate-50 rounded-xl p-2 min-w-[55px] text-center">
-                                    <span class="block text-[10px] font-bold text-blue-600 uppercase tracking-tighter">${dateObj.toLocaleDateString('it-IT', { weekday: 'short' })}</span>
-                                    <span class="text-xl font-black text-slate-800">${d}</span>
-                                </div>
+                            <div class="bg-slate-50 rounded-xl p-2 min-w-[55px] text-center">
+                                <span class="block text-[10px] font-bold text-blue-600 uppercase tracking-tighter">${dateObj.toLocaleDateString('it-IT', { weekday: 'short' })}</span>
+                                <span class="text-xl font-black text-slate-800">${d}</span>
                             </div>
                             <select onchange="updateDay(${d}, this.value)" data-type="${saved}" class="rounded-xl px-4 py-3 text-sm font-black transition-all outline-none">
                                 <option value="presenza" ${saved === 'presenza' ? 'selected' : ''}>🏢 Ufficio</option>
@@ -193,12 +202,8 @@
             dom.calendarList.innerHTML = html;
 
             const ggNetti = totalWorkdays - count.ferie;
-            const percSW = parseInt(dom.swPercentage.value) / 100;
-            const percPresenza = 1 - percSW;
-            const recupero = parseInt(dom.recoveryDays.value) || 0;
-
-            const targetSW = Math.max(0, Math.round(ggNetti * percSW) - count.malattia);
-            const targetPresenza = Math.round(ggNetti * percPresenza) + recupero;
+            const targetSW = Math.max(0, Math.round(ggNetti * (state.config.percentage / 100)) - count.malattia);
+            const targetPresenza = Math.round(ggNetti * (1 - state.config.percentage / 100)) + state.config.recovery;
 
             dom.ggLavorativi.textContent = totalWorkdays;
             dom.ggNetti.textContent = ggNetti;
@@ -210,7 +215,7 @@
             dom.cardSW.style.borderColor = count.sw > targetSW ? '#ef4444' : 'transparent';
             dom.cardPresenza.style.borderColor = count.presenza < targetPresenza ? '#f59e0b' : 'transparent';
 
-            localStorage.setItem('sw_db_v8', JSON.stringify(state.data));
+            localStorage.setItem('sw_db_v9', JSON.stringify(state.data));
             lucide.createIcons();
         }
 
