@@ -4,127 +4,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SmartPlanner Pro</title>
+    
+    <meta name="theme-color" content="#2563eb">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2370/2370264.png">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f8fafc; 
+            -webkit-tap-highlight-color: transparent;
+        }
         .sticky-header { backdrop-filter: blur(12px); background-color: rgba(37, 99, 235, 0.95); }
         
-        /* Colori dinamici per le selezioni */
         select[data-type="presenza"] { color: #1e40af; background-color: #eff6ff; border: 1px solid #dbeafe; }
         select[data-type="sw"] { color: #166534; background-color: #f0fdf4; border: 1px solid #dcfce7; }
         select[data-type="ferie"] { color: #92400e; background-color: #fffbeb; border: 1px solid #fef3c7; }
         select[data-type="malattia"] { color: #991b1b; background-color: #fef2f2; border: 1px solid #fee2e2; }
         
-        select { 
-            appearance: none; 
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); 
-            background-repeat: no-repeat; 
-            background-position: right 0.75rem center; 
-            background-size: 1rem; 
-            padding-right: 2.5rem !important; 
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1rem;
+            padding-right: 2rem !important;
+            appearance: none;
         }
-        .hidden { display: none !important; }
     </style>
 </head>
-<body class="pb-10">
+<body class="pb-12">
 
-    <div id="authOverlay" class="fixed inset-0 z-[100] bg-slate-900 flex items-center justify-center p-6 text-center">
-        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-sm w-full">
-            <div class="w-20 h-20 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-3xl mx-auto mb-6 flex items-center justify-center text-white shadow-xl">
-                <i data-lucide="map-pin" class="w-10 h-10"></i>
-            </div>
-            <h2 class="text-3xl font-black mb-3 text-slate-800">SmartPlanner</h2>
-            <p class="text-slate-500 text-sm leading-relaxed mb-8">
-                Pianifica il tuo lavoro agile e coordina le presenze con i tuoi colleghi in tempo reale.
-            </p>
-            <button id="loginBtn" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all shadow-lg">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
-                Inizia con Google
-            </button>
-            <div id="loadingStatus" class="hidden mt-4 text-xs font-bold text-red-600 uppercase"></div>
+    <header class="sticky top-0 z-50 sticky-header text-white p-4 shadow-sm">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-black tracking-tight flex items-center gap-2">
+                <i data-lucide="calendar-range" class="w-6 h-6"></i> PLANNER
+            </h1>
+            <select id="monthSelector" class="bg-blue-700 border border-blue-400 rounded-xl px-3 py-1.5 text-sm font-bold outline-none"></select>
         </div>
-    </div>
+    </header>
 
-    <div id="appContent" class="hidden">
-        <header class="sticky top-0 z-50 sticky-header text-white p-4 shadow-md">
-            <div class="max-w-md mx-auto flex justify-between items-center">
-                <button id="logoutBtn" class="p-2 opacity-80"><i data-lucide="log-out" class="w-5 h-5"></i></button>
-                <select id="monthSelector" class="bg-blue-700 border border-blue-400 rounded-xl px-4 py-1.5 text-sm font-bold outline-none"></select>
-                <div id="syncStatus" class="w-3 h-3 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]"></div>
+    <main class="max-w-md mx-auto px-4 mt-6 space-y-4">
+        
+        <section class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="text-center">
+                    <label class="block text-[10px] text-slate-400 mb-2 uppercase font-black tracking-widest">Smart %</label>
+                    <input type="number" id="swPercentage" value="60" min="0" max="100" 
+                        class="w-full bg-slate-50 rounded-2xl py-4 text-center text-2xl font-black text-slate-800 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition-all">
+                </div>
+                <div class="text-center">
+                    <label class="block text-[10px] text-slate-400 mb-2 uppercase font-black tracking-widest">Recupero</label>
+                    <input type="number" id="recoveryDays" value="0" min="0" 
+                        class="w-full bg-slate-50 rounded-2xl py-4 text-center text-2xl font-black text-slate-800 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition-all">
+                </div>
             </div>
-        </header>
+        </section>
 
-        <main class="max-w-md mx-auto px-4 mt-6 space-y-4">
-            <section class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
-                <div class="grid grid-cols-2 gap-4 text-center">
-                    <div>
-                        <label class="block text-[10px] text-slate-400 mb-1 uppercase font-black tracking-widest">Smart % (Mese)</label>
-                        <input type="number" id="swPercentage" class="w-full bg-slate-50 rounded-2xl py-3 text-center text-xl font-black outline-none border-2 border-transparent focus:border-blue-500 transition-all">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] text-slate-400 mb-1 uppercase font-black tracking-widest">Recupero (Mese)</label>
-                        <input type="number" id="recoveryDays" class="w-full bg-slate-50 rounded-2xl py-3 text-center text-xl font-black outline-none border-2 border-transparent focus:border-blue-500 transition-all">
-                    </div>
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-slate-800 rounded-2xl py-4 px-2 text-center shadow-sm">
+                <span class="block text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-1">GG Lavorativi</span>
+                <span id="ggLavorativi" class="text-white text-2xl font-black">-</span>
+            </div>
+            <div class="bg-indigo-700 rounded-2xl py-4 px-2 text-center shadow-sm">
+                <span class="block text-[9px] text-indigo-200 font-bold uppercase tracking-widest mb-1">GG Netti (Base)</span>
+                <span id="ggNetti" class="text-white text-2xl font-black">-</span>
+            </div>
+        </div>
+
+        <section class="grid grid-cols-2 gap-3 sticky top-[75px] z-40">
+            <div id="cardSW" class="bg-white rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent transition-all">
+                <div class="flex items-center gap-2 mb-1">
+                    <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                    <span class="text-slate-500 text-[10px] font-bold uppercase">Smart Target</span>
                 </div>
-            </section>
-
-            <section class="grid grid-cols-2 gap-3 sticky top-[80px] z-40">
-                <div id="cardSW" class="bg-white/90 backdrop-blur-md rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent transition-all text-center">
-                    <span class="text-slate-500 text-[10px] font-bold uppercase block mb-1">Smart Target</span>
-                    <div class="flex justify-center items-baseline gap-1">
-                        <span id="actualSW" class="text-3xl font-black text-slate-800">0</span>
-                        <span class="text-slate-400 font-bold text-sm">/ <span id="targetSW">0</span></span>
-                    </div>
+                <div class="flex items-baseline gap-1">
+                    <span id="actualSW" class="text-3xl font-black text-slate-800">0</span>
+                    <span class="text-slate-400 font-bold text-sm">/ <span id="targetSW">0</span></span>
                 </div>
-                <div id="cardPresenza" class="bg-white/90 backdrop-blur-md rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent transition-all text-center">
-                    <span class="text-slate-500 text-[10px] font-bold uppercase block mb-1">Ufficio Target</span>
-                    <div class="flex justify-center items-baseline gap-1">
-                        <span id="actualPresenza" class="text-3xl font-black text-slate-800">0</span>
-                        <span class="text-slate-400 font-bold text-sm">/ <span id="targetPresenza">0</span></span>
-                    </div>
+            </div>
+            <div id="cardPresenza" class="bg-white rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent transition-all">
+                <div class="flex items-center gap-2 mb-1">
+                    <div class="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
+                    <span class="text-slate-500 text-[10px] font-bold uppercase">Ufficio Target</span>
                 </div>
-            </section>
+                <div class="flex items-baseline gap-1">
+                    <span id="actualPresenza" class="text-3xl font-black text-slate-800">0</span>
+                    <span class="text-slate-400 font-bold text-sm">/ <span id="targetPresenza">0</span></span>
+                </div>
+            </div>
+        </section>
 
-            <div id="calendarList" class="space-y-3 pb-10"></div>
-        </main>
-    </div>
+        <div id="calendarList" class="space-y-2"></div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    </main>
 
-        const firebaseConfig = {
-  apiKey: "AIzaSyBZ8vqYNgqhCe2Bi21CaRiOp5jiz9EEeFo",
-  authDomain: "smartplannerinv.firebaseapp.com",
-  databaseURL: "https://smartplannerinv-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "smartplannerinv",
-  storageBucket: "smartplannerinv.firebasestorage.app",
-  messagingSenderId: "845850448866",
-  appId: "1:845850448866:web:bb849a171023ce57725fbb",
-  measurementId: "G-5B9GCHDX7E"
-};
+    <script>
+        function getItalianHolidays(year) {
+            const h = [`${year}-01-01`, `${year}-01-06`, `${year}-04-25`, `${year}-05-01`, `${year}-06-02`, `${year}-08-15`, `${year}-11-01`, `${year}-12-08`, `${year}-12-25`, `${year}-12-26` ];
+            const a = year % 19, b = Math.floor(year / 100), c = year % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h_b = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h_b - k) % 7, m = Math.floor((a + 11 * h_b + 22 * l) / 451), month = Math.floor((h_b + l - 7 * m + 114) / 31), day = ((h_b + l - 7 * m + 114) % 31) + 1;
+            const p = new Date(year, month - 1, day + 1);
+            h.push(`${p.getFullYear()}-${String(p.getMonth()+1).padStart(2,'0')}-${String(p.getDate()).padStart(2,'0')}`);
+            return h;
+        }
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
-        const provider = new GoogleAuthProvider();
-
-        let currentUser = null;
-        let state = { 
-            currentMonth: new Date().toISOString().slice(0, 7), 
-            data: {}, 
-            monthlyConfigs: {},
-            globalPresence: {}
+        const state = {
+            currentMonth: (() => { const now = new Date(); return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`; })(),
+            data: JSON.parse(localStorage.getItem('sw_db_v8')) || {}
         };
 
         const dom = {
-            authOverlay: document.getElementById('authOverlay'),
-            appContent: document.getElementById('appContent'),
-            loginBtn: document.getElementById('loginBtn'),
-            logoutBtn: document.getElementById('logoutBtn'),
             monthSelector: document.getElementById('monthSelector'),
             swPercentage: document.getElementById('swPercentage'),
             recoveryDays: document.getElementById('recoveryDays'),
@@ -133,178 +124,98 @@
             targetPresenza: document.getElementById('targetPresenza'),
             actualSW: document.getElementById('actualSW'),
             actualPresenza: document.getElementById('actualPresenza'),
+            ggLavorativi: document.getElementById('ggLavorativi'),
+            ggNetti: document.getElementById('ggNetti'),
             cardSW: document.getElementById('cardSW'),
-            cardPresenza: document.getElementById('cardPresenza'),
-            syncStatus: document.getElementById('syncStatus')
+            cardPresenza: document.getElementById('cardPresenza')
         };
 
-        setPersistence(auth, browserLocalPersistence);
-
-        dom.loginBtn.onclick = async () => {
-            try { await signInWithPopup(auth, provider); } 
-            catch (err) { console.error(err); }
-        };
-
-        dom.logoutBtn.onclick = () => signOut(auth);
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                dom.authOverlay.classList.add('hidden');
-                dom.appContent.classList.remove('hidden');
-                initApp();
-            } else {
-                dom.authOverlay.classList.remove('hidden');
-                dom.appContent.classList.add('hidden');
-            }
-        });
-
-        function initApp() {
+        function init() {
             const now = new Date();
-            dom.monthSelector.innerHTML = '';
-            for (let i = -1; i < 12; i++) {
+            // Genera una finestra di 12 mesi a partire da oggi
+            for (let i = 0; i < 12; i++) {
                 const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-                const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-                dom.monthSelector.innerHTML += `<option value="${val}">${d.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })}</option>`;
+                const year = d.getFullYear();
+                const month = d.getMonth() + 1;
+                const val = `${year}-${String(month).padStart(2, '0')}`;
+                
+                dom.monthSelector.innerHTML += `<option value="${val}" ${val === state.currentMonth ? 'selected' : ''}>
+                    ${d.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })}
+                </option>`;
             }
-            dom.monthSelector.value = state.currentMonth;
 
-            onValue(ref(db, 'users/' + currentUser.uid), (snap) => {
-                const cloud = snap.val();
-                if (cloud) {
-                    state.data = cloud.calendar || {};
-                    state.monthlyConfigs = cloud.monthlyConfigs || {};
-                    syncGlobalPresence(); // Allinea i dati privati alla lista colleghi
-                }
-                loadMonthlyConfig();
-                render();
-            });
-
-            onValue(ref(db, 'global_presence'), (snap) => {
-                state.globalPresence = snap.val() || {};
-                render();
-            });
-
-            dom.monthSelector.onchange = (e) => { 
-                state.currentMonth = e.target.value; 
-                loadMonthlyConfig();
-                render(); 
-            };
-
-            const syncInputs = () => {
-                state.monthlyConfigs[state.currentMonth] = {
-                    percentage: parseInt(dom.swPercentage.value) || 0,
-                    recovery: parseInt(dom.recoveryDays.value) || 0
-                };
-                save();
-            };
-            dom.swPercentage.oninput = syncInputs;
-            dom.recoveryDays.oninput = syncInputs;
-        }
-
-        function syncGlobalPresence() {
-            if (!state.data) return;
-            Object.keys(state.data).forEach(monthKey => {
-                Object.keys(state.data[monthKey]).forEach(day => {
-                    const status = state.data[monthKey][day];
-                    const dayKey = `${monthKey}-${day}`;
-                    if (status === 'presenza') {
-                        set(ref(db, `global_presence/${dayKey}/${currentUser.uid}`), currentUser.displayName);
-                    } else {
-                        remove(ref(db, `global_presence/${dayKey}/${currentUser.uid}`));
-                    }
-                });
-            });
-        }
-
-        function loadMonthlyConfig() {
-            const conf = state.monthlyConfigs[state.currentMonth] || { percentage: 60, recovery: 0 };
-            dom.swPercentage.value = conf.percentage;
-            dom.recoveryDays.value = conf.recovery;
-        }
-
-        function save() {
-            dom.syncStatus.classList.replace('bg-green-400', 'bg-amber-400');
-            set(ref(db, 'users/' + currentUser.uid), { 
-                calendar: state.data, 
-                monthlyConfigs: state.monthlyConfigs 
-            }).then(() => dom.syncStatus.classList.replace('bg-amber-400', 'bg-green-400'));
-        }
-
-        function getHolidays(y) {
-            const h = [`${y}-01-01`,`${y}-01-06`,`${y}-04-25`,`${y}-05-01`,`${y}-06-02`,`${y}-08-15`,`${y}-11-01`,`${y}-12-08`,`${y}-12-25`,`${y}-12-26` ];
-            const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h_b=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h_b-k)%7,m=Math.floor((a+11*h_b+22*l)/451),month=Math.floor((h_b+l-7*m+114)/31),day=((h_b+l-7*m+114)%31)+1;
-            h.push(`${y}-${String(month).padStart(2,'0')}-${String(day+1).padStart(2,'0')}`);
-            return h;
+            dom.monthSelector.addEventListener('change', e => { state.currentMonth = e.target.value; render(); });
+            dom.swPercentage.addEventListener('input', render);
+            dom.recoveryDays.addEventListener('input', render);
+            render();
+            lucide.createIcons();
         }
 
         function render() {
-            const [y, m] = state.currentMonth.split('-').map(Number);
-            const daysInMonth = new Date(y, m, 0).getDate();
-            const holidays = getHolidays(y);
-            const conf = state.monthlyConfigs[state.currentMonth] || { percentage: 60, recovery: 0 };
-            
-            let html = '', workdays = 0, count = { presenza:0, sw:0, ferie:0, malattia:0 };
+            const [year, month] = state.currentMonth.split('-').map(Number);
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const holidays = getItalianHolidays(year);
+            const monthKey = state.currentMonth;
+
+            if (!state.data[monthKey]) state.data[monthKey] = {};
+
+            let html = '';
+            let totalWorkdays = 0;
+            let count = { presenza: 0, sw: 0, ferie: 0, malattia: 0 };
 
             for (let d = 1; d <= daysInMonth; d++) {
-                const dObj = new Date(y, m-1, d, 12, 0, 0);
-                const dStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                
-                if (dObj.getDay()!==0 && dObj.getDay()!==6 && !holidays.includes(dStr)) {
-                    workdays++;
-                    const val = (state.data[state.currentMonth] && state.data[state.currentMonth][d]) || 'presenza';
-                    count[val]++;
+                const dateObj = new Date(year, month - 1, d, 12, 0, 0);
+                const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const isWeekend = (dateObj.getDay() === 0 || dateObj.getDay() === 6);
+                const isHoliday = holidays.includes(dateStr);
 
-                    const dayKey = `${state.currentMonth}-${d}`;
-                    const colleagues = state.globalPresence[dayKey] ? Object.values(state.globalPresence[dayKey]).filter(name => name !== currentUser.displayName) : [];
-                    const colleaguesHtml = colleagues.length > 0 ? 
-                        `<div class="mt-2 text-[10px] text-slate-400 flex items-center gap-1 font-medium"><i data-lucide="users" class="w-3 h-3"></i> In ufficio: ${colleagues.join(', ')}</div>` : '';
-
+                if (!isWeekend && !isHoliday) {
+                    totalWorkdays++;
+                    const saved = state.data[monthKey][d] || 'presenza';
+                    count[saved]++;
                     html += `
-                        <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm transition-all">
-                            <div class="flex items-center justify-between">
+                        <div class="bg-white p-4 rounded-2xl flex items-center justify-between border border-slate-100 shadow-sm">
+                            <div class="flex items-center gap-3">
                                 <div class="bg-slate-50 rounded-xl p-2 min-w-[55px] text-center">
-                                    <span class="block text-[10px] font-bold text-blue-600 uppercase">${dObj.toLocaleDateString('it-IT',{weekday:'short'})}</span>
+                                    <span class="block text-[10px] font-bold text-blue-600 uppercase tracking-tighter">${dateObj.toLocaleDateString('it-IT', { weekday: 'short' })}</span>
                                     <span class="text-xl font-black text-slate-800">${d}</span>
                                 </div>
-                                <select onchange="window.updateDay(${d}, this.value)" data-type="${val}" class="rounded-xl px-4 py-3 text-sm font-black outline-none transition-all">
-                                    <option value="presenza" ${val==='presenza'?'selected':''}>🏢 Ufficio</option>
-                                    <option value="sw" ${val==='sw'?'selected':''}>🏠 Smart</option>
-                                    <option value="ferie" ${val==='ferie'?'selected':''}>🌴 Ferie</option>
-                                    <option value="malattia" ${val==='malattia'?'selected':''}>🤒 Malattia</option>
-                                </select>
                             </div>
-                            ${colleaguesHtml}
+                            <select onchange="updateDay(${d}, this.value)" data-type="${saved}" class="rounded-xl px-4 py-3 text-sm font-black transition-all outline-none">
+                                <option value="presenza" ${saved === 'presenza' ? 'selected' : ''}>🏢 Ufficio</option>
+                                <option value="sw" ${saved === 'sw' ? 'selected' : ''}>🏠 Smart</option>
+                                <option value="ferie" ${saved === 'ferie' ? 'selected' : ''}>🌴 Ferie</option>
+                                <option value="malattia" ${saved === 'malattia' ? 'selected' : ''}>🤒 Malattia</option>
+                            </select>
                         </div>`;
                 }
             }
             dom.calendarList.innerHTML = html;
 
-            const netti = workdays - count.ferie;
-            const tSW = Math.max(0, Math.round(netti * (conf.percentage/100)) - count.malattia);
-            const tPres = Math.round(netti * (1 - conf.percentage/100)) + conf.recovery;
+            const ggNetti = totalWorkdays - count.ferie;
+            const percSW = parseInt(dom.swPercentage.value) / 100;
+            const percPresenza = 1 - percSW;
+            const recupero = parseInt(dom.recoveryDays.value) || 0;
 
-            dom.targetSW.textContent = tSW; dom.targetPresenza.textContent = tPres;
-            dom.actualSW.textContent = count.sw; dom.actualPresenza.textContent = count.presenza;
-            dom.cardSW.style.borderColor = count.sw > tSW ? '#ef4444' : 'transparent';
-            dom.cardPresenza.style.borderColor = count.presenza < tPres ? '#f59e0b' : 'transparent';
+            const targetSW = Math.max(0, Math.round(ggNetti * percSW) - count.malattia);
+            const targetPresenza = Math.round(ggNetti * percPresenza) + recupero;
+
+            dom.ggLavorativi.textContent = totalWorkdays;
+            dom.ggNetti.textContent = ggNetti;
+            dom.targetSW.textContent = targetSW;
+            dom.targetPresenza.textContent = targetPresenza;
+            dom.actualSW.textContent = count.sw;
+            dom.actualPresenza.textContent = count.presenza;
+
+            dom.cardSW.style.borderColor = count.sw > targetSW ? '#ef4444' : 'transparent';
+            dom.cardPresenza.style.borderColor = count.presenza < targetPresenza ? '#f59e0b' : 'transparent';
+
+            localStorage.setItem('sw_db_v8', JSON.stringify(state.data));
             lucide.createIcons();
         }
 
-        window.updateDay = (day, value) => {
-            if(!state.data[state.currentMonth]) state.data[state.currentMonth] = {};
-            state.data[state.currentMonth][day] = value;
-            
-            const dayKey = `${state.currentMonth}-${day}`;
-            if (value === 'presenza') {
-                set(ref(db, `global_presence/${dayKey}/${currentUser.uid}`), currentUser.displayName);
-            } else {
-                remove(ref(db, `global_presence/${dayKey}/${currentUser.uid}`));
-            }
-            save();
-        };
-
-        lucide.createIcons();
+        function updateDay(day, value) { state.data[state.currentMonth][day] = value; render(); }
+        init();
     </script>
 </body>
 </html>
