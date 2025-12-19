@@ -28,9 +28,20 @@
             padding-right: 2.5rem !important; 
         }
         .hidden { display: none !important; }
+        
+        /* Impedisce il "lampo" bianco o della schermata login */
+        #authOverlay, #appContent { 
+            transition: opacity 0.3s ease-in-out; 
+        }
     </style>
 </head>
 <body class="pb-10">
+    
+    <script>
+        if (localStorage.getItem('firebase:authUser:' + "AIzaSyBZ8vqYNgqhCe2Bi21CaRiOp5jiz9EEeFo" + ':[DEFAULT]')) {
+            document.documentElement.style.backgroundColor = "#2563eb"; // Colore header per continuità
+        }
+    </script>
     
     <div id="authOverlay" class="fixed inset-0 z-[100] bg-slate-900 flex items-center justify-center p-6 text-center">
         <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-sm w-full">
@@ -152,10 +163,12 @@
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
+                // Nascondi login e mostra app senza sfarfallio
                 dom.authOverlay.classList.add('hidden');
                 dom.appContent.classList.remove('hidden');
                 initApp();
             } else {
+                // Mostra il login solo se siamo sicuri che l'utente non sia loggato
                 dom.authOverlay.classList.remove('hidden');
                 dom.appContent.classList.add('hidden');
             }
