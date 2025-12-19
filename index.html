@@ -282,7 +282,7 @@
             dom.workableDays.textContent = workdays;
             dom.effectiveDays.textContent = netti - count.malattia;
 
-            const tSW = Math.max(0, Math.round(netti * (conf.percentage/100)) - count.malattia);
+            const tSW = Math.max(0, Math.round(netti * (conf.percentage/100)) - count.malattia - conf.recovery);
             const tPres = Math.round(netti * (1 - conf.percentage/100)) + conf.recovery;
 
             dom.targetSW.textContent = tSW; dom.targetPresenza.textContent = tPres;
