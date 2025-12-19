@@ -12,7 +12,6 @@
         .sticky-header { backdrop-filter: blur(12px); background-color: rgba(37, 99, 235, 0.95); }
         
         /* Colori dinamici per le selezioni */
-        select[data-type="none"] { color: #64748b; background-color: #f1f5f9; border: 1px solid #e2e8f0; }
         select[data-type="presenza"] { color: #1e40af; background-color: #eff6ff; border: 1px solid #dbeafe; }
         select[data-type="sw"] { color: #166534; background-color: #f0fdf4; border: 1px solid #dcfce7; }
         select[data-type="ferie"] { color: #92400e; background-color: #fffbeb; border: 1px solid #fef3c7; }
@@ -37,11 +36,14 @@
                 <i data-lucide="map-pin" class="w-10 h-10"></i>
             </div>
             <h2 class="text-3xl font-black mb-3 text-slate-800">SmartPlanner</h2>
-            <p class="text-slate-500 text-sm mb-8">Pianifica il mese e guarda chi trovi in ufficio.</p>
+            <p class="text-slate-500 text-sm leading-relaxed mb-8">
+                Pianifica il tuo lavoro agile e coordina le presenze con i tuoi colleghi in tempo reale.
+            </p>
             <button id="loginBtn" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all shadow-lg">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
-                Accedi con Google
+                Inizia con Google
             </button>
+            <div id="loadingStatus" class="hidden mt-4 text-xs font-bold text-red-600 uppercase"></div>
         </div>
     </div>
 
@@ -50,45 +52,38 @@
             <div class="max-w-md mx-auto flex justify-between items-center">
                 <button id="logoutBtn" class="p-2 opacity-80"><i data-lucide="log-out" class="w-5 h-5"></i></button>
                 <select id="monthSelector" class="bg-blue-700 border border-blue-400 rounded-xl px-4 py-1.5 text-sm font-bold outline-none"></select>
-                <div id="syncStatus" class="w-3 h-3 rounded-full bg-green-400 shadow-sm"></div>
+                <div id="syncStatus" class="w-3 h-3 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]"></div>
             </div>
         </header>
 
         <main class="max-w-md mx-auto px-4 mt-6 space-y-4">
-            
-            <section class="bg-slate-900 text-white rounded-[2rem] p-5 shadow-xl flex justify-around items-center">
-                <div class="text-center">
-                    <span class="block text-[10px] text-slate-400 uppercase font-black mb-1">Lavorabili</span>
-                    <span id="workableDays" class="text-2xl font-black">0</span>
-                </div>
-                <div class="h-8 w-[1px] bg-slate-700"></div>
-                <div class="text-center">
-                    <span class="block text-[10px] text-slate-400 uppercase font-black mb-1">Lavorati</span>
-                    <span id="effectiveDays" class="text-2xl font-black text-blue-400">0</span>
-                </div>
-            </section>
-
             <section class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
                 <div class="grid grid-cols-2 gap-4 text-center">
                     <div>
-                        <label class="block text-[10px] text-slate-400 mb-1 uppercase font-black tracking-widest">Smart %</label>
+                        <label class="block text-[10px] text-slate-400 mb-1 uppercase font-black tracking-widest">Smart % (Mese)</label>
                         <input type="number" id="swPercentage" class="w-full bg-slate-50 rounded-2xl py-3 text-center text-xl font-black outline-none border-2 border-transparent focus:border-blue-500 transition-all">
                     </div>
                     <div>
-                        <label class="block text-[10px] text-slate-400 mb-1 uppercase font-black tracking-widest">Recupero (gg)</label>
+                        <label class="block text-[10px] text-slate-400 mb-1 uppercase font-black tracking-widest">Recupero (Mese)</label>
                         <input type="number" id="recoveryDays" class="w-full bg-slate-50 rounded-2xl py-3 text-center text-xl font-black outline-none border-2 border-transparent focus:border-blue-500 transition-all">
                     </div>
                 </div>
             </section>
 
             <section class="grid grid-cols-2 gap-3 sticky top-[80px] z-40">
-                <div id="cardSW" class="bg-white/90 backdrop-blur-md rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent text-center transition-all">
+                <div id="cardSW" class="bg-white/90 backdrop-blur-md rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent transition-all text-center">
                     <span class="text-slate-500 text-[10px] font-bold uppercase block mb-1">Smart Target</span>
-                    <div class="flex justify-center items-baseline gap-1"><span id="actualSW" class="text-3xl font-black text-slate-800">0</span><span class="text-slate-400 font-bold text-sm">/ <span id="targetSW">0</span></span></div>
+                    <div class="flex justify-center items-baseline gap-1">
+                        <span id="actualSW" class="text-3xl font-black text-slate-800">0</span>
+                        <span class="text-slate-400 font-bold text-sm">/ <span id="targetSW">0</span></span>
+                    </div>
                 </div>
-                <div id="cardPresenza" class="bg-white/90 backdrop-blur-md rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent text-center transition-all">
+                <div id="cardPresenza" class="bg-white/90 backdrop-blur-md rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent transition-all text-center">
                     <span class="text-slate-500 text-[10px] font-bold uppercase block mb-1">Ufficio Target</span>
-                    <div class="flex justify-center items-baseline gap-1"><span id="actualPresenza" class="text-3xl font-black text-slate-800">0</span><span class="text-slate-400 font-bold text-sm">/ <span id="targetPresenza">0</span></span></div>
+                    <div class="flex justify-center items-baseline gap-1">
+                        <span id="actualPresenza" class="text-3xl font-black text-slate-800">0</span>
+                        <span class="text-slate-400 font-bold text-sm">/ <span id="targetPresenza">0</span></span>
+                    </div>
                 </div>
             </section>
 
@@ -102,14 +97,15 @@
         import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
-            apiKey: "IL_TUO_API_KEY",
-            authDomain: "IL_TUO_PROGETTO.firebaseapp.com",
-            databaseURL: "https://IL_TUO_PROGETTO-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "IL_TUO_PROGETTO_ID",
-            storageBucket: "IL_TUO_PROGETTO.appspot.com",
-            messagingSenderId: "IL_TUO_SENDER_ID",
-            appId: "IL_TUO_APP_ID"
-        };
+  apiKey: "AIzaSyBZ8vqYNgqhCe2Bi21CaRiOp5jiz9EEeFo",
+  authDomain: "smartplannerinv.firebaseapp.com",
+  databaseURL: "https://smartplannerinv-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "smartplannerinv",
+  storageBucket: "smartplannerinv.firebasestorage.app",
+  messagingSenderId: "845850448866",
+  appId: "1:845850448866:web:bb849a171023ce57725fbb",
+  measurementId: "G-5B9GCHDX7E"
+};
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -117,7 +113,12 @@
         const provider = new GoogleAuthProvider();
 
         let currentUser = null;
-        let state = { currentMonth: new Date().toISOString().slice(0, 7), data: {}, monthlyConfigs: {}, globalPresence: {} };
+        let state = { 
+            currentMonth: new Date().toISOString().slice(0, 7), 
+            data: {}, 
+            monthlyConfigs: {},
+            globalPresence: {}
+        };
 
         const dom = {
             authOverlay: document.getElementById('authOverlay'),
@@ -134,14 +135,16 @@
             actualPresenza: document.getElementById('actualPresenza'),
             cardSW: document.getElementById('cardSW'),
             cardPresenza: document.getElementById('cardPresenza'),
-            syncStatus: document.getElementById('syncStatus'),
-            workableDays: document.getElementById('workableDays'),
-            effectiveDays: document.getElementById('effectiveDays')
+            syncStatus: document.getElementById('syncStatus')
         };
 
         setPersistence(auth, browserLocalPersistence);
 
-        dom.loginBtn.onclick = () => signInWithPopup(auth, provider);
+        dom.loginBtn.onclick = async () => {
+            try { await signInWithPopup(auth, provider); } 
+            catch (err) { console.error(err); }
+        };
+
         dom.logoutBtn.onclick = () => signOut(auth);
 
         onAuthStateChanged(auth, (user) => {
@@ -168,8 +171,11 @@
 
             onValue(ref(db, 'users/' + currentUser.uid), (snap) => {
                 const cloud = snap.val();
-                state.data = cloud?.calendar || {};
-                state.monthlyConfigs = cloud?.monthlyConfigs || {};
+                if (cloud) {
+                    state.data = cloud.calendar || {};
+                    state.monthlyConfigs = cloud.monthlyConfigs || {};
+                    syncGlobalPresence(); // Allinea i dati privati alla lista colleghi
+                }
                 loadMonthlyConfig();
                 render();
             });
@@ -179,16 +185,36 @@
                 render();
             });
 
-            dom.monthSelector.onchange = (e) => { state.currentMonth = e.target.value; loadMonthlyConfig(); render(); };
-            const syncInp = () => {
+            dom.monthSelector.onchange = (e) => { 
+                state.currentMonth = e.target.value; 
+                loadMonthlyConfig();
+                render(); 
+            };
+
+            const syncInputs = () => {
                 state.monthlyConfigs[state.currentMonth] = {
                     percentage: parseInt(dom.swPercentage.value) || 0,
                     recovery: parseInt(dom.recoveryDays.value) || 0
                 };
                 save();
             };
-            dom.swPercentage.oninput = syncInp;
-            dom.recoveryDays.oninput = syncInp;
+            dom.swPercentage.oninput = syncInputs;
+            dom.recoveryDays.oninput = syncInputs;
+        }
+
+        function syncGlobalPresence() {
+            if (!state.data) return;
+            Object.keys(state.data).forEach(monthKey => {
+                Object.keys(state.data[monthKey]).forEach(day => {
+                    const status = state.data[monthKey][day];
+                    const dayKey = `${monthKey}-${day}`;
+                    if (status === 'presenza') {
+                        set(ref(db, `global_presence/${dayKey}/${currentUser.uid}`), currentUser.displayName);
+                    } else {
+                        remove(ref(db, `global_presence/${dayKey}/${currentUser.uid}`));
+                    }
+                });
+            });
         }
 
         function loadMonthlyConfig() {
@@ -199,8 +225,10 @@
 
         function save() {
             dom.syncStatus.classList.replace('bg-green-400', 'bg-amber-400');
-            set(ref(db, 'users/' + currentUser.uid), { calendar: state.data, monthlyConfigs: state.monthlyConfigs })
-                .then(() => dom.syncStatus.classList.replace('bg-amber-400', 'bg-green-400'));
+            set(ref(db, 'users/' + currentUser.uid), { 
+                calendar: state.data, 
+                monthlyConfigs: state.monthlyConfigs 
+            }).then(() => dom.syncStatus.classList.replace('bg-amber-400', 'bg-green-400'));
         }
 
         function getHolidays(y) {
@@ -216,7 +244,7 @@
             const holidays = getHolidays(y);
             const conf = state.monthlyConfigs[state.currentMonth] || { percentage: 60, recovery: 0 };
             
-            let html = '', workdays = 0, count = { presenza:0, sw:0, ferie:0, malattia:0, none: 0 };
+            let html = '', workdays = 0, count = { presenza:0, sw:0, ferie:0, malattia:0 };
 
             for (let d = 1; d <= daysInMonth; d++) {
                 const dObj = new Date(y, m-1, d, 12, 0, 0);
@@ -224,13 +252,13 @@
                 
                 if (dObj.getDay()!==0 && dObj.getDay()!==6 && !holidays.includes(dStr)) {
                     workdays++;
-                    const val = (state.data[state.currentMonth] && state.data[state.currentMonth][d]) || 'none';
-                    if(count[val] !== undefined) count[val]++;
+                    const val = (state.data[state.currentMonth] && state.data[state.currentMonth][d]) || 'presenza';
+                    count[val]++;
 
                     const dayKey = `${state.currentMonth}-${d}`;
                     const colleagues = state.globalPresence[dayKey] ? Object.values(state.globalPresence[dayKey]).filter(name => name !== currentUser.displayName) : [];
                     const colleaguesHtml = colleagues.length > 0 ? 
-                        `<div class="mt-2 text-[10px] text-slate-400 flex items-center gap-1 font-medium"><i data-lucide="users" class="w-3 h-3"></i> Colleghi: ${colleagues.join(', ')}</div>` : '';
+                        `<div class="mt-2 text-[10px] text-slate-400 flex items-center gap-1 font-medium"><i data-lucide="users" class="w-3 h-3"></i> In ufficio: ${colleagues.join(', ')}</div>` : '';
 
                     html += `
                         <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm transition-all">
@@ -240,7 +268,6 @@
                                     <span class="text-xl font-black text-slate-800">${d}</span>
                                 </div>
                                 <select onchange="window.updateDay(${d}, this.value)" data-type="${val}" class="rounded-xl px-4 py-3 text-sm font-black outline-none transition-all">
-                                    <option value="none" ${val==='none'?'selected':''}>❓ Scegli...</option>
                                     <option value="presenza" ${val==='presenza'?'selected':''}>🏢 Ufficio</option>
                                     <option value="sw" ${val==='sw'?'selected':''}>🏠 Smart</option>
                                     <option value="ferie" ${val==='ferie'?'selected':''}>🌴 Ferie</option>
@@ -254,17 +281,13 @@
             dom.calendarList.innerHTML = html;
 
             const netti = workdays - count.ferie;
-            dom.workableDays.textContent = workdays;
-            dom.effectiveDays.textContent = netti - count.malattia;
-
             const tSW = Math.max(0, Math.round(netti * (conf.percentage/100)) - count.malattia);
             const tPres = Math.round(netti * (1 - conf.percentage/100)) + conf.recovery;
 
             dom.targetSW.textContent = tSW; dom.targetPresenza.textContent = tPres;
             dom.actualSW.textContent = count.sw; dom.actualPresenza.textContent = count.presenza;
-
-            dom.cardSW.style.borderColor = (count.sw > tSW && count.sw > 0) ? '#ef4444' : 'transparent';
-            dom.cardPresenza.style.borderColor = (count.presenza < tPres && count.presenza > 0) ? '#f59e0b' : 'transparent';
+            dom.cardSW.style.borderColor = count.sw > tSW ? '#ef4444' : 'transparent';
+            dom.cardPresenza.style.borderColor = count.presenza < tPres ? '#f59e0b' : 'transparent';
             lucide.createIcons();
         }
 
