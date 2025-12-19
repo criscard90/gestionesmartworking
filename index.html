@@ -12,7 +12,6 @@
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         .sticky-header { backdrop-filter: blur(12px); background-color: rgba(37, 99, 235, 0.95); }
         
-        /* Colori dinamici per le selezioni */
         select[data-type="none"] { color: #64748b; background-color: #f1f5f9; border: 1px solid #e2e8f0; }
         select[data-type="presenza"] { color: #1e40af; background-color: #eff6ff; border: 1px solid #dbeafe; }
         select[data-type="sw"] { color: #166534; background-color: #f0fdf4; border: 1px solid #dcfce7; }
@@ -27,265 +26,238 @@
             background-size: 1rem; 
             padding-right: 2.5rem !important; 
         }
-        .hidden { display: none !important; }
-        
-        
-        /* Schermata di caricamento che copre tutto */
-        #loadingScreen {
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            background-color: #f8fafc;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.3s ease;
-        }
-        
-        /* Nascondiamo tutto di default all'avvio */
-        #authOverlay, #appContent { display: none !important; }
-        
-        /* Classi per mostrare gli elementi correttamente */
+
+        /* Gestione stati iniziali */
+        #loadingScreen { position: fixed; inset: 0; z-index: 9999; background-color: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.3s ease; }
+        #authOverlay { display: none; }
+        #appContent { display: none; }
         .flex-active { display: flex !important; }
         .block-active { display: block !important; }
-        
-        /* Animazione rotellina */
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #e2e8f0;
-            border-top: 4px solid #2563eb;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
+
+        .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top: 4px solid #2563eb; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="pb-10">
+
     <div id="loadingScreen">
         <div class="spinner"></div>
         <p class="mt-4 text-slate-400 font-medium animate-pulse">SmartPlanner...</p>
     </div>
-    
+
     <div id="authOverlay" class="fixed inset-0 z-[100] bg-slate-900 flex-col items-center justify-center p-6 text-center">
         <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-sm w-full">
             <div class="w-20 h-20 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-3xl mx-auto mb-6 flex items-center justify-center text-white shadow-xl">
                 <i data-lucide="map-pin" class="w-10 h-10"></i>
             </div>
             <h2 class="text-3xl font-black mb-3 text-slate-800">SmartPlanner</h2>
-            <button id="loginBtn" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-3">
+            <p class="text-slate-500 text-sm mb-8">Pianifica il lavoro e vedi chi è in ufficio!</p>
+            <button id="loginBtn" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> Accedi con Google
             </button>
         </div>
     </div>
-    
-    <div id="appContent">
-    </div>
-    <header class="sticky top-0 z-50 sticky-header text-white p-4 shadow-md">
-        <div class="max-w-md mx-auto flex items-center">
-            <button id="logoutBtn" class="p-2 mr-auto hover:bg-blue-500 rounded-lg transition-colors">
-                <i data-lucide="log-out" class="w-5 h-5"></i>
-            </button>
-            
-            <select id="monthSelector" class="bg-blue-700 border border-blue-400 rounded-xl px-4 py-1.5 text-sm font-bold outline-none mx-auto"></select>
-            
-            <div id="syncStatus" class="w-3 h-3 rounded-full bg-green-400 ml-auto shadow-sm"></div>
-        </div>
-    </header>
-    
-    <main class="max-w-md mx-auto px-4 mt-6 space-y-4">
-        <section class="bg-slate-900 text-white rounded-[2rem] p-5 shadow-xl flex justify-around items-center">
-            <div class="text-center">
-                <span class="block text-[10px] text-slate-400 uppercase font-black mb-1">Lavorabili</span>
-                <span id="workableDays" class="text-2xl font-black">0</span>
-            </div>
-            <div class="h-8 w-[1px] bg-slate-700"></div>
-            <div class="text-center">
-                <span class="block text-[10px] text-slate-400 uppercase font-black mb-1">Effettivi</span>
-                <span id="effectiveDays" class="text-2xl font-black text-blue-400">0</span>
-            </div>
-        </section>
-        
-        <section class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
-            <div class="grid grid-cols-2 gap-4 text-center">
-                <div>
-                    <label class="block text-[10px] text-slate-400 mb-1 uppercase font-black">Smart %</label>
-                    <input type="number" id="swPercentage" class="w-full bg-slate-50 rounded-2xl py-3 text-center text-xl font-black outline-none border-2 border-transparent focus:border-blue-500">
-                </div>
-                <div>
-                    <label class="block text-[10px] text-slate-400 mb-1 uppercase font-black">Recupero</label>
-                    <input type="number" id="recoveryDays" class="w-full bg-slate-50 rounded-2xl py-3 text-center text-xl font-black outline-none border-2 border-transparent focus:border-blue-500">
-                </div>
-            </div>
-        </section>
-        
-        <section class="grid grid-cols-2 gap-3 sticky top-[80px] z-40">
-            <div id="cardSW" class="bg-white/90 backdrop-blur-md rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent text-center transition-all">
-                <span class="text-slate-500 text-[10px] font-bold uppercase block mb-1 text-center">Smart Target</span>
-                <div class="flex justify-center items-baseline gap-1"><span id="actualSW" class="text-3xl font-black">0</span><span class="text-slate-400 font-bold text-sm">/ <span id="targetSW">0</span></span></div>
-            </div>
-            <div id="cardPresenza" class="bg-white/90 backdrop-blur-md rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent text-center transition-all">
-                <span class="text-slate-500 text-[10px] font-bold uppercase block mb-1 text-center">Ufficio Target</span>
-                <div class="flex justify-center items-baseline gap-1"><span id="actualPresenza" class="text-3xl font-black">0</span><span class="text-slate-400 font-bold text-sm">/ <span id="targetPresenza">0</span></span></div>
-            </div>
-        </section>
-        
-        <div id="calendarList" class="space-y-3 pb-10"></div>
-    </main>
-</div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-    
-    const firebaseConfig = {
-        apiKey: "AIzaSyBZ8vqYNgqhCe2Bi21CaRiOp5jiz9EEeFo",
-        authDomain: "smartplannerinv.firebaseapp.com",
-        databaseURL: "https://smartplannerinv-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "smartplannerinv",
-        storageBucket: "smartplannerinv.firebasestorage.app",
-        messagingSenderId: "845850448866",
-        appId: "1:845850448866:web:bb849a171023ce57725fbb",
-        measurementId: "G-5B9GCHDX7E"
-    };
-    
-    
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    const provider = new GoogleAuthProvider();
-    
-    let currentUser = null;
-    let state = { currentMonth: new Date().toISOString().slice(0, 7), data: {}, monthlyConfigs: {}, globalPresence: {} };
-    
-    const dom = {
-        authOverlay: document.getElementById('authOverlay'),
-        appContent: document.getElementById('appContent'),
-        loginBtn: document.getElementById('loginBtn'),
-        logoutBtn: document.getElementById('logoutBtn'),
-        monthSelector: document.getElementById('monthSelector'),
-        swPercentage: document.getElementById('swPercentage'),
-        recoveryDays: document.getElementById('recoveryDays'),
-        calendarList: document.getElementById('calendarList'),
-        targetSW: document.getElementById('targetSW'),
-        targetPresenza: document.getElementById('targetPresenza'),
-        actualSW: document.getElementById('actualSW'),
-        actualPresenza: document.getElementById('actualPresenza'),
-        cardSW: document.getElementById('cardSW'),
-        cardPresenza: document.getElementById('cardPresenza'),
-        syncStatus: document.getElementById('syncStatus'),
-        workableDays: document.getElementById('workableDays'),
-        effectiveDays: document.getElementById('effectiveDays')
-    };
-    
-    setPersistence(auth, browserLocalPersistence);
-    
-    dom.loginBtn.onclick = () => signInWithPopup(auth, provider);
-    dom.logoutBtn.onclick = () => signOut(auth);
-    
-    onAuthStateChanged(auth, (user) => {
-        const loader = document.getElementById('loadingScreen');
-        const authOverlay = document.getElementById('authOverlay');
-        const appContent = document.getElementById('appContent');
-        
-        if (user) {
-            // UTENTE LOGGATO
-            currentUser = user;
-            authOverlay.classList.remove('flex-active');
-            appContent.classList.add('block-active');
-            initApp();
-        } else {
-            // UTENTE NON LOGGATO
-            appContent.classList.remove('block-active');
-            authOverlay.classList.add('flex-active');
-        }
-        
-        // Nascondi il caricamento in ogni caso dopo che Firebase ha risposto
-        setTimeout(() => {
-            loader.style.opacity = '0';
-            setTimeout(() => loader.style.display = 'none', 300);
-        }, 200); 
-    });
-    
-    function initApp() {
-        const now = new Date();
-        dom.monthSelector.innerHTML = '';
-        for (let i = -1; i < 12; i++) {
-            const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-            const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-            dom.monthSelector.innerHTML += `<option value="${val}">${d.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })}</option>`;
-        }
-        dom.monthSelector.value = state.currentMonth;
-        
-        onValue(ref(db, 'users/' + currentUser.uid), (snap) => {
-            const cloud = snap.val();
-            state.data = cloud?.calendar || {};
-            state.monthlyConfigs = cloud?.monthlyConfigs || {};
-            loadMonthlyConfig();
-            render();
-        });
-        
-        onValue(ref(db, 'global_presence'), (snap) => {
-            state.globalPresence = snap.val() || {};
-            render();
-        });
-        
-        dom.monthSelector.onchange = (e) => { state.currentMonth = e.target.value; loadMonthlyConfig(); render(); };
-        const syncInp = () => {
-            state.monthlyConfigs[state.currentMonth] = {
-                percentage: parseInt(dom.swPercentage.value) || 0,
-                recovery: parseInt(dom.recoveryDays.value) || 0
-            };
-            save();
+    <div id="appContent">
+        <header class="sticky top-0 z-50 sticky-header text-white p-4 shadow-md">
+            <div class="max-w-md mx-auto flex items-center">
+                <button id="logoutBtn" class="p-2 mr-auto hover:bg-blue-500 rounded-lg transition-colors">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </button>
+                <select id="monthSelector" class="bg-blue-700 border border-blue-400 rounded-xl px-4 py-1.5 text-sm font-bold outline-none mx-auto"></select>
+                <div id="syncStatus" class="w-3 h-3 rounded-full bg-green-400 ml-auto shadow-sm"></div>
+            </div>
+        </header>
+
+        <main class="max-w-md mx-auto px-4 mt-6 space-y-4">
+            <section class="bg-slate-900 text-white rounded-[2rem] p-5 shadow-xl flex justify-around items-center">
+                <div class="text-center">
+                    <span class="block text-[10px] text-slate-400 uppercase font-black mb-1">Lavorabili</span>
+                    <span id="workableDays" class="text-2xl font-black">0</span>
+                </div>
+                <div class="h-8 w-[1px] bg-slate-700"></div>
+                <div class="text-center">
+                    <span class="block text-[10px] text-slate-400 uppercase font-black mb-1">Effettivi</span>
+                    <span id="effectiveDays" class="text-2xl font-black text-blue-400">0</span>
+                </div>
+            </section>
+
+            <section class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
+                <div class="grid grid-cols-2 gap-4 text-center">
+                    <div>
+                        <label class="block text-[10px] text-slate-400 mb-1 uppercase font-black">Smart %</label>
+                        <input type="number" id="swPercentage" class="w-full bg-slate-50 rounded-2xl py-3 text-center text-xl font-black outline-none border-2 border-transparent focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-400 mb-1 uppercase font-black">Recupero</label>
+                        <input type="number" id="recoveryDays" class="w-full bg-slate-50 rounded-2xl py-3 text-center text-xl font-black outline-none border-2 border-transparent focus:border-blue-500">
+                    </div>
+                </div>
+            </section>
+
+            <section class="grid grid-cols-2 gap-3 sticky top-[80px] z-40">
+                <div id="cardSW" class="bg-white/90 backdrop-blur-md rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent text-center transition-all">
+                    <span class="text-slate-500 text-[10px] font-bold uppercase block mb-1">Smart Target</span>
+                    <div class="flex justify-center items-baseline gap-1"><span id="actualSW" class="text-3xl font-black">0</span><span class="text-slate-400 font-bold text-sm">/ <span id="targetSW">0</span></span></div>
+                </div>
+                <div id="cardPresenza" class="bg-white/90 backdrop-blur-md rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent text-center transition-all">
+                    <span class="text-slate-500 text-[10px] font-bold uppercase block mb-1">Ufficio Target</span>
+                    <div class="flex justify-center items-baseline gap-1"><span id="actualPresenza" class="text-3xl font-black">0</span><span class="text-slate-400 font-bold text-sm">/ <span id="targetPresenza">0</span></span></div>
+                </div>
+            </section>
+
+            <div id="calendarList" class="space-y-3 pb-10"></div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZ8vqYNgqhCe2Bi21CaRiOp5jiz9EEeFo",
+            authDomain: "smartplannerinv.firebaseapp.com",
+            databaseURL: "https://smartplannerinv-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "smartplannerinv",
+            storageBucket: "smartplannerinv.firebasestorage.app",
+            messagingSenderId: "845850448866",
+            appId: "1:845850448866:web:bb849a171023ce57725fbb",
+            measurementId: "G-5B9GCHDX7E"
         };
-        dom.swPercentage.oninput = syncInp;
-        dom.recoveryDays.oninput = syncInp;
-    }
-    
-    function loadMonthlyConfig() {
-        const conf = state.monthlyConfigs[state.currentMonth] || { percentage: 60, recovery: 0 };
-        dom.swPercentage.value = conf.percentage;
-        dom.recoveryDays.value = conf.recovery;
-    }
-    
-    function save() {
-        dom.syncStatus.classList.replace('bg-green-400', 'bg-amber-400');
-        set(ref(db, 'users/' + currentUser.uid), { calendar: state.data, monthlyConfigs: state.monthlyConfigs })
-        .then(() => dom.syncStatus.classList.replace('bg-amber-400', 'bg-green-400'));
-    }
-    
-    function getHolidays(y) {
-        const h = [`${y}-01-01`,`${y}-01-06`,`${y}-04-25`,`${y}-05-01`,`${y}-06-02`,`${y}-08-15`,`${y}-11-01`,`${y}-12-08`,`${y}-12-25`,`${y}-12-26` ];
-        const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h_b=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h_b-k)%7,m=Math.floor((a+11*h_b+22*l)/451),month=Math.floor((h_b+l-7*m+114)/31),day=((h_b+l-7*m+114)%31)+1;
-        h.push(`${y}-${String(month).padStart(2,'0')}-${String(day+1).padStart(2,'0')}`);
-        return h;
-    }
-    
-    function render() {
-        const [y, m] = state.currentMonth.split('-').map(Number);
-        const daysInMonth = new Date(y, m, 0).getDate();
-        const holidays = getHolidays(y);
-        const conf = state.monthlyConfigs[state.currentMonth] || { percentage: 60, recovery: 0 };
-        
-        let html = '', workdays = 0, count = { presenza:0, sw:0, ferie:0, malattia:0, none: 0 };
-        
-        for (let d = 1; d <= daysInMonth; d++) {
-            const dObj = new Date(y, m-1, d, 12, 0, 0);
-            const dStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const provider = new GoogleAuthProvider();
+
+        let currentUser = null;
+        let state = { currentMonth: new Date().toISOString().slice(0, 7), data: {}, monthlyConfigs: {}, globalPresence: {} };
+
+        const dom = {
+            authOverlay: document.getElementById('authOverlay'),
+            appContent: document.getElementById('appContent'),
+            loginBtn: document.getElementById('loginBtn'),
+            logoutBtn: document.getElementById('logoutBtn'),
+            monthSelector: document.getElementById('monthSelector'),
+            swPercentage: document.getElementById('swPercentage'),
+            recoveryDays: document.getElementById('recoveryDays'),
+            calendarList: document.getElementById('calendarList'),
+            targetSW: document.getElementById('targetSW'),
+            targetPresenza: document.getElementById('targetPresenza'),
+            actualSW: document.getElementById('actualSW'),
+            actualPresenza: document.getElementById('actualPresenza'),
+            cardSW: document.getElementById('cardSW'),
+            cardPresenza: document.getElementById('cardPresenza'),
+            syncStatus: document.getElementById('syncStatus'),
+            workableDays: document.getElementById('workableDays'),
+            effectiveDays: document.getElementById('effectiveDays'),
+            loader: document.getElementById('loadingScreen')
+        };
+
+        setPersistence(auth, browserLocalPersistence);
+
+        dom.loginBtn.onclick = () => signInWithPopup(auth, provider);
+        dom.logoutBtn.onclick = () => signOut(auth);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                dom.authOverlay.classList.remove('flex-active');
+                dom.appContent.classList.add('block-active');
+                initApp();
+            } else {
+                currentUser = null;
+                dom.appContent.classList.remove('block-active');
+                dom.authOverlay.classList.add('flex-active');
+            }
+
+            // Nascondi sempre il caricamento dopo la risposta di Firebase
+            setTimeout(() => {
+                dom.loader.style.opacity = '0';
+                setTimeout(() => dom.loader.style.display = 'none', 300);
+            }, 400);
+        });
+
+        function initApp() {
+            const now = new Date();
+            dom.monthSelector.innerHTML = '';
+            for (let i = -1; i < 12; i++) {
+                const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+                const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                dom.monthSelector.innerHTML += `<option value="${val}">${d.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })}</option>`;
+            }
+            dom.monthSelector.value = state.currentMonth;
+
+            onValue(ref(db, 'users/' + currentUser.uid), (snap) => {
+                const cloud = snap.val();
+                state.data = cloud?.calendar || {};
+                state.monthlyConfigs = cloud?.monthlyConfigs || {};
+                loadMonthlyConfig();
+                render();
+            });
+
+            onValue(ref(db, 'global_presence'), (snap) => {
+                state.globalPresence = snap.val() || {};
+                render();
+            });
+
+            dom.monthSelector.onchange = (e) => { state.currentMonth = e.target.value; loadMonthlyConfig(); render(); };
+            const syncInp = () => {
+                state.monthlyConfigs[state.currentMonth] = {
+                    percentage: parseInt(dom.swPercentage.value) || 0,
+                    recovery: parseInt(dom.recoveryDays.value) || 0
+                };
+                save();
+            };
+            dom.swPercentage.oninput = syncInp;
+            dom.recoveryDays.oninput = syncInp;
+        }
+
+        function loadMonthlyConfig() {
+            const conf = state.monthlyConfigs[state.currentMonth] || { percentage: 60, recovery: 0 };
+            dom.swPercentage.value = conf.percentage;
+            dom.recoveryDays.value = conf.recovery;
+        }
+
+        function save() {
+            if (!currentUser) return;
+            dom.syncStatus.classList.replace('bg-green-400', 'bg-amber-400');
+            set(ref(db, 'users/' + currentUser.uid), { calendar: state.data, monthlyConfigs: state.monthlyConfigs })
+                .then(() => dom.syncStatus.classList.replace('bg-amber-400', 'bg-green-400'));
+        }
+
+        function getHolidays(y) {
+            const h = [`${y}-01-01`,`${y}-01-06`,`${y}-04-25`,`${y}-05-01`,`${y}-06-02`,`${y}-08-15`,`${y}-11-01`,`${y}-12-08`,`${y}-12-25`,`${y}-12-26` ];
+            const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h_b=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h_b-k)%7,m=Math.floor((a+11*h_b+22*l)/451),month=Math.floor((h_b+l-7*m+114)/31),day=((h_b+l-7*m+114)%31)+1;
+            h.push(`${y}-${String(month).padStart(2,'0')}-${String(day+1).padStart(2,'0')}`);
+            return h;
+        }
+
+        function render() {
+            if (!currentUser) return;
+            const [y, m] = state.currentMonth.split('-').map(Number);
+            const daysInMonth = new Date(y, m, 0).getDate();
+            const holidays = getHolidays(y);
+            const conf = state.monthlyConfigs[state.currentMonth] || { percentage: 60, recovery: 0 };
             
-            if (dObj.getDay()!==0 && dObj.getDay()!==6 && !holidays.includes(dStr)) {
-                workdays++;
-                const val = (state.data[state.currentMonth] && state.data[state.currentMonth][d]) || 'none';
-                if(count[val] !== undefined) count[val]++;
+            let html = '', workdays = 0, count = { presenza:0, sw:0, ferie:0, malattia:0, none: 0 };
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dObj = new Date(y, m-1, d, 12, 0, 0);
+                const dStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 
-                const dayKey = `${state.currentMonth}-${d}`;
-                const colleagues = state.globalPresence[dayKey] ? Object.values(state.globalPresence[dayKey]).filter(name => name !== currentUser.displayName) : [];
-                const colleaguesHtml = colleagues.length > 0 ? 
-                `<div class="mt-2 text-[10px] text-slate-400 flex items-center gap-1 font-medium"><i data-lucide="users" class="w-3 h-3"></i> Colleghi: ${colleagues.join(', ')}</div>` : '';
-                
-                html += `
+                if (dObj.getDay()!==0 && dObj.getDay()!==6 && !holidays.includes(dStr)) {
+                    workdays++;
+                    const val = (state.data[state.currentMonth] && state.data[state.currentMonth][d]) || 'none';
+                    if(count[val] !== undefined) count[val]++;
+
+                    const dayKey = `${state.currentMonth}-${d}`;
+                    const colleagues = state.globalPresence[dayKey] ? Object.values(state.globalPresence[dayKey]).filter(name => name !== currentUser.displayName) : [];
+                    const colleaguesHtml = colleagues.length > 0 ? 
+                        `<div class="mt-2 text-[10px] text-slate-400 flex items-center gap-1 font-medium"><i data-lucide="users" class="w-3 h-3"></i> Colleghi: ${colleagues.join(', ')}</div>` : '';
+
+                    html += `
                         <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm transition-all">
                             <div class="flex items-center justify-between">
                                 <div class="bg-slate-50 rounded-xl p-2 min-w-[55px] text-center">
@@ -302,49 +274,41 @@
                             </div>
                             ${colleaguesHtml}
                         </div>`;
+                }
             }
+            dom.calendarList.innerHTML = html;
+
+            const netti = workdays - count.ferie;
+            dom.workableDays.textContent = workdays;
+            dom.effectiveDays.textContent = netti - count.malattia;
+
+            const tSW = Math.max(0, Math.round(netti * (conf.percentage/100)) - count.malattia);
+            const tPres = Math.round(netti * (1 - conf.percentage/100)) + conf.recovery;
+
+            dom.targetSW.textContent = tSW; dom.targetPresenza.textContent = tPres;
+            dom.actualSW.textContent = count.sw; dom.actualPresenza.textContent = count.presenza;
+
+            const possibileRaggiungereTarget = (count.presenza + count.none) >= tPres;
+            dom.cardPresenza.style.borderColor = (!possibileRaggiungereTarget) ? '#f59e0b' : 'transparent';
+            dom.cardSW.style.borderColor = (count.sw > tSW) ? '#ef4444' : 'transparent';
+            
+            lucide.createIcons();
         }
-        dom.calendarList.innerHTML = html;
-        
-        const netti = workdays - count.ferie;
-        dom.workableDays.textContent = workdays;
-        dom.effectiveDays.textContent = netti - count.malattia;
-        
-        const tSW = Math.max(0, Math.round(netti * (conf.percentage/100)) - count.malattia);
-        const tPres = Math.round(netti * (1 - conf.percentage/100)) + conf.recovery;
-        
-        dom.targetSW.textContent = tSW; 
-        dom.targetPresenza.textContent = tPres;
-        dom.actualSW.textContent = count.sw; 
-        dom.actualPresenza.textContent = count.presenza;
-        
-        // NUOVA LOGICA BORDI
-        const giorniRimanenti = count.none;
-        const possibileRaggiungereTarget = (count.presenza + giorniRimanenti) >= tPres;
-        
-        // Arancione solo se matematicamente non puoi più farcela
-        dom.cardPresenza.style.borderColor = (!possibileRaggiungereTarget) ? '#f59e0b' : 'transparent';
-        
-        // Rosso se hai superato i giorni di Smart consentiti
-        dom.cardSW.style.borderColor = (count.sw > tSW) ? '#ef4444' : 'transparent';
-        
+
+        window.updateDay = (day, value) => {
+            if(!state.data[state.currentMonth]) state.data[state.currentMonth] = {};
+            state.data[state.currentMonth][day] = value;
+            
+            const dayKey = `${state.currentMonth}-${day}`;
+            if (value === 'presenza') {
+                set(ref(db, `global_presence/${dayKey}/${currentUser.uid}`), currentUser.displayName);
+            } else {
+                remove(ref(db, `global_presence/${dayKey}/${currentUser.uid}`));
+            }
+            save();
+        };
+
         lucide.createIcons();
-    }
-    
-    window.updateDay = (day, value) => {
-        if(!state.data[state.currentMonth]) state.data[state.currentMonth] = {};
-        state.data[state.currentMonth][day] = value;
-        
-        const dayKey = `${state.currentMonth}-${day}`;
-        if (value === 'presenza') {
-            set(ref(db, `global_presence/${dayKey}/${currentUser.uid}`), currentUser.displayName);
-        } else {
-            remove(ref(db, `global_presence/${dayKey}/${currentUser.uid}`));
-        }
-        save();
-    };
-    
-    lucide.createIcons();
-</script>
+    </script>
 </body>
 </html>
