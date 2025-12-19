@@ -11,6 +11,7 @@
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         .sticky-header { backdrop-filter: blur(12px); background-color: rgba(37, 99, 235, 0.95); }
         
+        /* Colori dinamici per le selezioni */
         select[data-type="none"] { color: #64748b; background-color: #f1f5f9; border: 1px solid #e2e8f0; }
         select[data-type="presenza"] { color: #1e40af; background-color: #eff6ff; border: 1px solid #dbeafe; }
         select[data-type="sw"] { color: #166534; background-color: #f0fdf4; border: 1px solid #dcfce7; }
@@ -40,30 +41,31 @@
             <button id="loginBtn" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> Accedi con Google
             </button>
-            <p id="errorMsg" class="mt-4 text-xs text-red-500 hidden font-bold"></p>
         </div>
     </div>
 
     <div id="appContent" class="hidden">
         <header class="sticky top-0 z-50 sticky-header text-white p-4 shadow-md">
-            <div class="max-w-md mx-auto flex items-center justify-between">
-                <button id="logoutBtn" class="p-2 hover:bg-blue-600 rounded-xl transition-colors">
+            <div class="max-w-md mx-auto flex items-center">
+                <button id="logoutBtn" class="p-2 mr-auto hover:bg-blue-500 rounded-lg transition-colors">
                     <i data-lucide="log-out" class="w-5 h-5"></i>
                 </button>
-                <select id="monthSelector" class="bg-blue-700 border border-blue-400 rounded-xl px-4 py-1.5 text-sm font-bold outline-none"></select>
-                <div id="syncStatus" class="w-3 h-3 rounded-full bg-green-400 shadow-sm"></div>
+                
+                <select id="monthSelector" class="bg-blue-700 border border-blue-400 rounded-xl px-4 py-1.5 text-sm font-bold outline-none mx-auto"></select>
+                
+                <div id="syncStatus" class="w-3 h-3 rounded-full bg-green-400 ml-auto shadow-sm"></div>
             </div>
         </header>
 
         <main class="max-w-md mx-auto px-4 mt-6 space-y-4">
             <section class="bg-slate-900 text-white rounded-[2rem] p-5 shadow-xl flex justify-around items-center">
                 <div class="text-center">
-                    <span class="block text-[10px] text-slate-400 uppercase font-black mb-1 tracking-widest">Lavorabili</span>
+                    <span class="block text-[10px] text-slate-400 uppercase font-black mb-1">Lavorabili</span>
                     <span id="workableDays" class="text-2xl font-black">0</span>
                 </div>
                 <div class="h-8 w-[1px] bg-slate-700"></div>
                 <div class="text-center">
-                    <span class="block text-[10px] text-slate-400 uppercase font-black mb-1 tracking-widest">Effettivi</span>
+                    <span class="block text-[10px] text-slate-400 uppercase font-black mb-1">Effettivi</span>
                     <span id="effectiveDays" class="text-2xl font-black text-blue-400">0</span>
                 </div>
             </section>
@@ -82,12 +84,12 @@
             </section>
 
             <section class="grid grid-cols-2 gap-3 sticky top-[80px] z-40">
-                <div id="cardSW" class="bg-white/90 backdrop-blur-md rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent text-center">
-                    <span class="text-slate-500 text-[10px] font-bold uppercase block mb-1">Smart Target</span>
+                <div id="cardSW" class="bg-white/90 backdrop-blur-md rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent text-center transition-all">
+                    <span class="text-slate-500 text-[10px] font-bold uppercase block mb-1 text-center">Smart Target</span>
                     <div class="flex justify-center items-baseline gap-1"><span id="actualSW" class="text-3xl font-black">0</span><span class="text-slate-400 font-bold text-sm">/ <span id="targetSW">0</span></span></div>
                 </div>
-                <div id="cardPresenza" class="bg-white/90 backdrop-blur-md rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent text-center">
-                    <span class="text-slate-500 text-[10px] font-bold uppercase block mb-1">Ufficio Target</span>
+                <div id="cardPresenza" class="bg-white/90 backdrop-blur-md rounded-[1.5rem] p-4 shadow-lg border-2 border-transparent text-center transition-all">
+                    <span class="text-slate-500 text-[10px] font-bold uppercase block mb-1 text-center">Ufficio Target</span>
                     <div class="flex justify-center items-baseline gap-1"><span id="actualPresenza" class="text-3xl font-black">0</span><span class="text-slate-400 font-bold text-sm">/ <span id="targetPresenza">0</span></span></div>
                 </div>
             </section>
@@ -101,15 +103,17 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        const firebaseConfig = {
-            apiKey: "IL_TUO_API_KEY",
-            authDomain: "IL_TUO_PROGETTO.firebaseapp.com",
-            databaseURL: "https://IL_TUO_PROGETTO-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "IL_TUO_PROGETTO_ID",
-            storageBucket: "IL_TUO_PROGETTO.appspot.com",
-            messagingSenderId: "IL_TUO_SENDER_ID",
-            appId: "IL_TUO_APP_ID"
-        };
+const firebaseConfig = {
+  apiKey: "AIzaSyBZ8vqYNgqhCe2Bi21CaRiOp5jiz9EEeFo",
+  authDomain: "smartplannerinv.firebaseapp.com",
+  databaseURL: "https://smartplannerinv-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "smartplannerinv",
+  storageBucket: "smartplannerinv.firebasestorage.app",
+  messagingSenderId: "845850448866",
+  appId: "1:845850448866:web:bb849a171023ce57725fbb",
+  measurementId: "G-5B9GCHDX7E"
+};
+
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -136,22 +140,12 @@
             cardPresenza: document.getElementById('cardPresenza'),
             syncStatus: document.getElementById('syncStatus'),
             workableDays: document.getElementById('workableDays'),
-            effectiveDays: document.getElementById('effectiveDays'),
-            errorMsg: document.getElementById('errorMsg')
+            effectiveDays: document.getElementById('effectiveDays')
         };
 
         setPersistence(auth, browserLocalPersistence);
 
-        dom.loginBtn.onclick = async () => {
-            try {
-                await signInWithPopup(auth, provider);
-            } catch (err) {
-                dom.errorMsg.textContent = "Errore: sblocca i popup o riprova.";
-                dom.errorMsg.classList.remove('hidden');
-                console.error(err);
-            }
-        };
-
+        dom.loginBtn.onclick = () => signInWithPopup(auth, provider);
         dom.logoutBtn.onclick = () => signOut(auth);
 
         onAuthStateChanged(auth, (user) => {
