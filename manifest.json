@@ -1,6 +1,6 @@
 {
   "name": "SmartPlanner",
-  "short_name": "SmartWork",
+  "short_name": "SmartPlanner",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#2563eb",
