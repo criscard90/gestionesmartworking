@@ -12,11 +12,20 @@
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         .sticky-header { backdrop-filter: blur(12px); background-color: rgba(37, 99, 235, 0.95); }
         
-        select[data-type="none"] { color: #64748b; background-color: #f1f5f9; border: 1px solid #e2e8f0; }
-        select[data-type="presenza"] { color: #1e40af; background-color: #eff6ff; border: 1px solid #dbeafe; }
-        select[data-type="sw"] { color: #166534; background-color: #f0fdf4; border: 1px solid #dcfce7; }
-        select[data-type="ferie"] { color: #92400e; background-color: #fffbeb; border: 1px solid #fef3c7; }
-        select[data-type="malattia"] { color: #991b1b; background-color: #fef2f2; border: 1px solid #fee2e2; }
+        /* 4 tasti tipologia del giorno: evidenziati quando selezionati */
+        .day-type-btn {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 3px; padding: 9px 2px; border-radius: 1rem;
+            border: 1px solid #e2e8f0; background-color: #f8fafc; color: #94a3b8;
+            transition: all 0.15s ease; -webkit-tap-highlight-color: transparent;
+        }
+        .day-type-btn:active { transform: scale(0.93); }
+        .day-type-btn .day-type-label { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1; }
+        .day-type-btn[aria-pressed="true"] { transform: none; box-shadow: 0 6px 14px -6px rgba(15, 23, 42, 0.30); }
+        .day-type-btn[data-type="presenza"][aria-pressed="true"] { color: #1e40af; background-color: #dbeafe; border-color: #93c5fd; }
+        .day-type-btn[data-type="sw"][aria-pressed="true"] { color: #166534; background-color: #dcfce7; border-color: #86efac; }
+        .day-type-btn[data-type="ferie"][aria-pressed="true"] { color: #92400e; background-color: #fef3c7; border-color: #fcd34d; }
+        .day-type-btn[data-type="malattia"][aria-pressed="true"] { color: #991b1b; background-color: #fee2e2; border-color: #fca5a5; }
         
         select { 
             appearance: none; 
@@ -133,6 +142,14 @@
         
         let currentUser = null;
         let state = { currentMonth: new Date().toISOString().slice(0, 7), data: {}, monthlyConfigs: {}, globalPresence: {} };
+        
+        // Tipologie selezionabili per ogni giorno (4 tasti con icona)
+        const DAY_TYPES = [
+            { key: 'presenza', label: 'Ufficio',  icon: 'building-2' },
+            { key: 'sw',       label: 'Smart',    icon: 'house' },
+            { key: 'ferie',    label: 'Ferie',    icon: 'tree-palm' },
+            { key: 'malattia', label: 'Malattia', icon: 'stethoscope' }
+        ];
         
         const dom = {
             authOverlay: document.getElementById('authOverlay'),
@@ -271,18 +288,18 @@
                     
                     html += `
                         <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm transition-all">
-                            <div class="flex items-center justify-between">
-                                <div class="bg-slate-50 rounded-xl p-2 min-w-[55px] text-center">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-slate-50 rounded-xl p-2 min-w-[55px] text-center shrink-0">
                                     <span class="block text-[10px] font-bold text-blue-600 uppercase">${dObj.toLocaleDateString('it-IT',{weekday:'short'})}</span>
                                     <span class="text-xl font-black text-slate-800">${d}</span>
                                 </div>
-                                <select onchange="window.updateDay(${d}, this.value)" data-type="${val}" class="rounded-xl px-4 py-3 text-sm font-black outline-none transition-all">
-                                    <option value="none" ${val==='none'?'selected':''}>❓ Scegli...</option>
-                                    <option value="presenza" ${val==='presenza'?'selected':''}>🏢 Ufficio</option>
-                                    <option value="sw" ${val==='sw'?'selected':''}>🏠 Smart</option>
-                                    <option value="ferie" ${val==='ferie'?'selected':''}>🌴 Ferie</option>
-                                    <option value="malattia" ${val==='malattia'?'selected':''}>🤒 Malattia</option>
-                                </select>
+                                <div class="flex-1 grid grid-cols-4 gap-1.5">
+                                    ${DAY_TYPES.map(t => `
+                                    <button type="button" onclick="window.updateDay(${d}, '${t.key}')" data-type="${t.key}" aria-pressed="${val === t.key}" title="${t.label}" class="day-type-btn">
+                                        <i data-lucide="${t.icon}" class="w-4 h-4"></i>
+                                        <span class="day-type-label">${t.label}</span>
+                                    </button>`).join('')}
+                                </div>
                             </div>
                             ${colleaguesHtml}
                         </div>`;
@@ -309,6 +326,11 @@
         
         window.updateDay = (day, value) => {
             if(!state.data[state.currentMonth]) state.data[state.currentMonth] = {};
+            
+            // Click su un tasto già attivo => deselezione (torna a "nessuna scelta")
+            const current = state.data[state.currentMonth][day] || 'none';
+            if (current === value) value = 'none';
+            
             state.data[state.currentMonth][day] = value;
             
             const dayKey = `${state.currentMonth}-${day}`;
@@ -318,6 +340,7 @@
                 remove(ref(db, `global_presence/${dayKey}/${currentUser.uid}`));
             }
             save();
+            render(); // evidenziazione immediata del tasto, senza attendere l'eco di Firebase
         };
         
         lucide.createIcons();
